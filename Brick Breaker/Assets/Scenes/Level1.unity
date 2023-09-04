@@ -2642,7 +2642,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigidbody: {fileID: 0}
-  speed: 95
+  speed: 110
   paddleScript: {fileID: 0}
   paddle: {fileID: 489347143}
   isRed: 0
@@ -8738,6 +8738,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7056855891863215250, guid: 4f7282ff21ce5461191845638284b805, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
     - target: {fileID: 7111414667295858869, guid: 4f7282ff21ce5461191845638284b805, type: 3}
       propertyPath: m_RootOrder
       value: 0

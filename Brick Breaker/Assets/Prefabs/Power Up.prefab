@@ -161,11 +161,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec9e151b19ff8468eb17299615f2996e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startPos: {x: 1.875, y: 0}
+  startPos: {x: -0.625, y: 0.57}
   speed: 0.04
   powerUps:
   - {fileID: -2413806693520163455, guid: 1b272eb72490141a89554431027496f1, type: 3}
   - {fileID: 7482667652216324306, guid: 337e619312f5b483bb3628979fc34e4c, type: 3}
-  - {fileID: 7482667652216324306, guid: 84e7ed56eec1745ffa6cdf85d9872438, type: 3}
-  - {fileID: 3625043607559282579, guid: 511b20e3a2217492f9500e79fbda99d5, type: 3}
+  - {fileID: 21300000, guid: 5f9d0ec0a92f59a4580be33a0d61b808, type: 3}
+  - {fileID: 21300000, guid: 07c42850352c3bd4f92dd7844165fbd0, type: 3}
   sr: {fileID: 0}
