@@ -11,6 +11,7 @@
   const FW = ["util", "kant", "virtue"];
   const ENDING_ORDER = ["last_aboard", "silent_radio", "miras_place", "coordinates", "clean_hands"];
   const HOLD_MS = 900;
+  const CHIP = { util: "Util", kant: "Kant", virtue: "Virtue" };
   const DECIDE_MS = 20000;
 
   /* ───────── icons (24×24 line drawings) ───────── */
@@ -308,9 +309,9 @@
   function decide(node, id) {
     return new Promise((resolve) => {
       renderer.push(true);
-      $("#promptK").textContent = `Decision ${ROMAN[node.chapter]} of IV`;
+      $("#promptK").textContent = `Decision ${ROMAN[node.chapter]} of IV · ${node.theme}`;
       $("#promptQ").textContent = node.prompt;
-      $("#promptSub").textContent = node.promptSub;
+      $("#promptSub").textContent = node.dilemma;
       promptEl.classList.remove("urgent");
       promptEl.hidden = false;
       const bar = $("#timerBar");
@@ -336,11 +337,19 @@
       const buttons = node.choices.map((c, i) => {
         const b = el("button", "choice");
         b.type = "button";
-        b.setAttribute("aria-label", `${c.label}. ${c.sub} Hold to choose.`);
+        b.setAttribute("aria-label", `${c.label}. ${c.sub} Gain: ${c.pro} Cost: ${c.con} Press and hold to choose.`);
+        // what you do, then what you gain and what it costs
+        const outcome = (kind, mark, text) => {
+          const row = el("span", `c-out ${kind}`);
+          row.append(el("i", null, mark), el("span", null, text));
+          return row;
+        };
         b.append(
           html("span", "", svgIcon(c.icon, "ico")).firstChild,
           el("span", "c-label", c.label),
           el("span", "c-sub", c.sub),
+          outcome("pro", "+", c.pro),
+          outcome("con", "−", c.con),
           html("span", "c-hold", `Hold <b>${i + 1}</b>`)
         );
         b._hold = holdable(b, () => commit(c, b));
@@ -348,6 +357,7 @@
         return b;
       });
       holdHandles = buttons.map((b) => b._hold);
+      if (!state.history.length) setTimeout(() => !decided && toast("Press and hold a choice"), 1400);
 
       function commit(c, b) {
         if (decided) return;
@@ -424,14 +434,21 @@
     FW.forEach((k) => {
       const v = verdictOf(node.debrief.lenses[k], choice);
       const m = el("div", `medal ${v}`);
-      m.append(html("div", "disc", svgIcon(k)), el("span", "medal-name", S.frameworks[k].short), el("span", "medal-v", v === "agree" ? "Agrees" : v === "disagree" ? "Disagrees" : "Divided"));
+      const txt = el("div", "medal-txt");
+      txt.append(
+        el("span", "medal-name", S.frameworks[k].short),
+        el("span", "medal-motto", S.frameworks[k].motto),
+        el("span", "medal-v", v === "agree" ? "Agrees" : v === "disagree" ? "Disagrees" : "Divided"),
+        el("span", "medal-says", node.debrief.lenses[k].says)
+      );
+      m.append(html("div", "disc", svgIcon(k)), txt);
       medals.append(m);
     });
-    reactEl.replaceChildren(el("p", "react-k", "The philosophers react"), el("p", "react-choice", choice.label), medals);
+    reactEl.replaceChildren(el("p", "react-k", "The philosophers react to your choice"), el("p", "react-choice", choice.label), medals);
     reactEl.hidden = false;
     if (A) [0, 350, 700].forEach((d) => setTimeout(() => A.click(), d));
     await sleep(900);
-    await waitAdvance(5000);
+    await waitAdvance(10000);
     reactEl.hidden = true;
   }
 
@@ -615,13 +632,15 @@
     state.history.forEach(({ node, choice }) => {
       const d = node.debrief;
       const c = el("article", "dcard");
-      c.append(el("span", "d-top", `${ROMAN[node.chapter]} · ${node.title}`));
+      const other = node.choices.find((x) => x !== choice);
+      c.append(el("span", "d-top", `${ROMAN[node.chapter]} · ${node.title}`), el("p", "d-q", node.dilemma));
       c.append(html("div", "d-choice", `${svgIcon(choice.icon)}<span></span>`));
       c.querySelector(".d-choice span").textContent = choice.label;
+      c.append(el("span", "d-other", `instead of: ${other.label}`));
       const vs = el("div", "d-verdicts");
       FW.forEach((f) => {
         const v = verdictOf(d.lenses[f], choice);
-        const chip = html("span", `chip ${v}`, `${svgIcon(f)}${v === "agree" ? "✓" : v === "disagree" ? "✗" : "~"}`);
+        const chip = html("span", `chip ${v}`, `${svgIcon(f)}${CHIP[f]} ${v === "agree" ? "✓" : v === "disagree" ? "✗" : "~"}`);
         chip.title = `${S.frameworks[f].short}: ${v === "agree" ? "agrees" : v === "disagree" ? "disagrees" : "divided"}`;
         vs.append(chip);
       });

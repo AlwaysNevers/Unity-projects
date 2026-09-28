@@ -192,6 +192,9 @@ body:not([data-screen="play"]) .stat {
   cursor: pointer;
   font-family: var(--mono);
 }
+body[data-screen="doc"] #sound {
+  background: var(--night);
+}
 #sound:hover {
   color: var(--ash);
   border-color: var(--ash-dim);
@@ -445,11 +448,12 @@ body:not([data-screen="play"]) .stat {
   --p: 0;
   position: relative;
   overflow: hidden;
-  width: min(380px, 44vw);
+  width: min(430px, 46vw);
   display: grid;
   grid-template-columns: 52px 1fr;
   gap: 4px 16px;
-  align-items: center;
+  align-items: start;
+  align-content: start;
   text-align: left;
   padding: 18px 20px;
   border: 1px solid var(--line);
@@ -489,7 +493,7 @@ body:not([data-screen="play"]) .stat {
   position: relative;
 }
 .choice .ico {
-  grid-row: span 3;
+  grid-row: span 4;
   width: 52px;
   height: 52px;
   color: var(--flare);
@@ -502,12 +506,45 @@ body:not([data-screen="play"]) .stat {
   text-transform: uppercase;
   letter-spacing: 0.01em;
 }
+.choice .c-label {
+  padding-right: 64px;
+}
 .choice .c-sub {
-  font-size: 16px;
-  color: var(--ash-dim);
+  font-size: 17px;
+  color: var(--ash);
   line-height: 1.3;
 }
+.choice .c-out {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 6px;
+  font-size: 15.5px;
+  line-height: 1.35;
+  color: var(--ash-dim);
+}
+.choice .c-out.pro {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.choice .c-out i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: center;
+}
+.choice .c-out.pro i {
+  color: var(--flare);
+}
+.choice .c-out.con i {
+  color: var(--blood);
+}
 .choice .c-hold {
+  position: absolute;
+  top: 16px;
+  right: 16px;
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.16em;
@@ -583,8 +620,8 @@ body:not([data-screen="play"]) .stat {
 .medal {
   display: grid;
   justify-items: center;
-  gap: 8px;
-  width: 116px;
+  gap: 10px;
+  width: 210px;
   text-align: center;
   animation: pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
@@ -609,17 +646,34 @@ body:not([data-screen="play"]) .stat {
   width: 40px;
   height: 40px;
 }
+.medal-txt {
+  display: grid;
+  gap: 3px;
+}
 .medal-name {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ash);
 }
+.medal-motto {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--ash-faint);
+}
+.medal-says {
+  margin-top: 4px;
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--ash);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
 .medal-v {
+  margin-top: 6px;
   font-family: var(--display);
   font-weight: 800;
-  font-size: 20px;
+  font-size: 22px;
   text-transform: uppercase;
   line-height: 1;
   color: var(--ash-dim);
@@ -657,7 +711,7 @@ body:not([data-screen="play"]) .stat {
   position: fixed;
   z-index: 40;
   left: 50%;
-  top: calc(18vh + var(--safe-t));
+  top: 46%;
   transform: translateX(-50%);
   margin: 0;
   padding: 8px 16px;
@@ -1092,6 +1146,21 @@ body:not([data-screen="play"]) .stat {
   text-transform: uppercase;
   color: var(--ash-faint);
 }
+.d-q {
+  margin: 0 !important;
+  font-size: 15px;
+  line-height: 1.35;
+  font-style: italic;
+  color: var(--ash-dim);
+}
+.d-other {
+  margin-top: -4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash-faint);
+}
 .d-choice {
   display: flex;
   align-items: center;
@@ -1112,6 +1181,7 @@ body:not([data-screen="play"]) .stat {
 }
 .d-verdicts {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 .chip {
@@ -1321,13 +1391,54 @@ body:not([data-screen="play"]) .stat {
     height: 40px;
   }
   .choice .c-label {
-    font-size: 25px;
+    font-size: 24px;
   }
   .choice .c-sub {
     font-size: 15px;
   }
+  .choice .c-out {
+    font-size: 14px;
+  }
+  .choice .c-out.pro {
+    margin-top: 2px;
+    padding-top: 5px;
+  }
+  .prompt-q {
+    font-size: clamp(40px, 12vw, 60px);
+  }
+  .prompt-sub {
+    font-size: 17px;
+  }
+  .medals {
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .medal {
+    width: auto;
+    grid-template-columns: 68px 1fr;
+    justify-items: start;
+    align-items: center;
+    column-gap: 14px;
+    text-align: left;
+  }
+  .medal-v {
+    margin-top: 2px;
+  }
+  .medal-says {
+    margin-top: 2px;
+    font-size: 15px;
+  }
   .prompt {
     top: calc(56px + var(--safe-t));
+  }
+  .prompt-k {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+  .react {
+    background: rgba(0, 0, 0, 0.78);
   }
   .caption {
     padding-bottom: calc(26px + var(--safe-b));
@@ -1335,12 +1446,9 @@ body:not([data-screen="play"]) .stat {
   .dcards {
     grid-template-columns: 1fr;
   }
-  .medal {
-    width: 92px;
-  }
   .disc {
-    width: 68px;
-    height: 68px;
+    width: 64px;
+    height: 64px;
   }
   .disc svg {
     width: 32px;

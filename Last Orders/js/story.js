@@ -8,13 +8,18 @@
   Each dilemma ("node") has:
     beats     short subtitle lines shown one at a time.
               A beat is a string, or { who, text, fx, variant, scene }.
+    theme     which of the project's two questions it tests
     prompt    the big question shown when it's time to decide
-    choices   two options. Each has its own consequence beats.
+    dilemma   the ethical question underneath it, in plain words
+    choices   two options. sub says what you do; pro and con say what
+              you gain and what it costs, as far as you know at the time.
+              Each option has its own consequence beats.
               tags.obey  true = followed an order, false = defied one, null = no order
               tags.ends  true = did harm for a better outcome, false = refused to
               next       the next dilemma, or ending = which ending
     debrief   how three ethical frameworks judge the choice.
               verdict is the key ("A"/"B") that framework leans toward, or "split".
+              says is the short reason shown in-game; text is the fuller one.
 */
 
 window.STORY = {
@@ -50,26 +55,28 @@ window.STORY = {
       time: "21:47",
       km: 40,
       scene: "bridge",
+      theme: "Orders vs. conscience",
       beats: [
-        "The Kessel bridge. The only crossing for twenty kilometers.",
-        "It’s wired with explosives. The detonator is in your hands.",
-        "Across the river, an enemy tank column. Two minutes out.",
-        "If they cross, thousands of people on the harbor road are trapped.",
-        "But forty refugees are still on the bridge.",
-        { who: "Lt. Harrow · radio", text: "Wren. Blow it. That’s an order. Now." }
+        "The Kessel bridge. The only way across the river for twenty kilometers.",
+        "Your unit has wired it with explosives. You’re holding the detonator.",
+        "Enemy tanks are coming. If they cross, thousands of people fleeing to the harbor will be trapped.",
+        "But forty refugees are still on the bridge. They need about three more minutes to get across.",
+        { who: "Lt. Harrow · radio", text: "Wren, blow the bridge. That’s an order. Now." }
       ],
       prompt: "Blow the bridge?",
-      promptSub: "Forty refugees on it. Thousands behind you.",
+      dilemma: "Should you obey an order that kills innocent people?",
       choices: [
         {
           key: "A",
           label: "Detonate",
-          sub: "Obey. Stop the tanks.",
+          sub: "Follow Harrow’s order.",
+          pro: "The tanks are stopped. Thousands escape.",
+          con: "The 40 refugees on the bridge die.",
           icon: "detonator",
           tags: { obey: true, ends: true },
           beats: [
             { text: "Your thumb comes down.", fx: "explosion", variant: "blown" },
-            "The middle span falls into the river. Everyone on it goes with it.",
+            "The middle of the bridge falls into the river. Everyone on it goes with it.",
             "The tanks stop. The harbor road is safe. Thousands will reach the ships tonight.",
             { who: "Lt. Harrow", text: "You did your job, Wren." }
           ],
@@ -78,28 +85,30 @@ window.STORY = {
         {
           key: "B",
           label: "Wait",
-          sub: "Defy the order. Let them cross.",
+          sub: "Disobey. Give them three minutes.",
+          pro: "The 40 refugees get across alive.",
+          con: "The tanks might cross too. Your unit is exposed.",
           icon: "hourglass",
           tags: { obey: false, ends: false },
           beats: [
-            { text: "You switch off the radio. Ninety seconds.", variant: "crossing" },
-            "The last family reaches your side. The lead tank rolls onto the bridge.",
-            { text: "You press the button.", fx: "explosion", variant: "blowntank" },
-            { text: "The tanks behind it open fire. Harrow is gone. Your company scatters.", fx: "shots" },
+            { text: "You switch off the radio and wait.", variant: "crossing" },
+            "The last family reaches your side. Then the first tank rolls onto the bridge.",
+            { text: "You press the button. The tank goes down with the bridge.", fx: "explosion", variant: "blowntank" },
+            { text: "The other tanks open fire. Harrow is killed. Your unit scatters.", fx: "shots" },
             "You’re alone now, with twelve of the refugees you saved."
           ],
           next: "cellar"
         }
       ],
       debrief: {
-        concept: "Superior orders & double effect",
-        context: "Real history: Seoul’s Hangang Bridge was blown up with refugees on it in 1950.",
+        concept: "Obeying orders & side effects",
+        context: "Real history: in 1950, Seoul’s Hangang Bridge was blown up while refugees were crossing it.",
         lenses: {
-          util: { verdict: "A", text: "Forty lives against thousands. Blow it." },
-          kant: { verdict: "B", text: "You may not knowingly kill innocents, and an order doesn’t make it Harrow’s act." },
-          virtue: { verdict: "split", text: "Courage or recklessness? It depends on what a wise person would see." }
+          util: { verdict: "A", says: "40 deaths to save thousands is worth it.", text: "Utilitarians judge by results. Forty deaths to save thousands is the better outcome, so blow the bridge." },
+          kant: { verdict: "B", says: "Killing innocents is wrong, even under orders.", text: "Kant says killing innocent people is wrong no matter the result. Being ordered to doesn’t make it someone else’s choice." },
+          virtue: { verdict: "split", says: "Brave duty, or cold obedience? It depends.", text: "Aristotle would ask what a brave and wise person would do. Is pressing the button courage or cold obedience? Thinkers disagree." }
         },
-        question: "If you only pressed it because you were ordered to, who killed them?"
+        question: "If you only pressed the button because you were ordered to, who is responsible for the deaths: you, Harrow, or the enemy?"
       }
     },
 
@@ -111,54 +120,59 @@ window.STORY = {
       time: "00:12",
       km: 31,
       scene: "farmhouse",
+      theme: "Ends vs. means",
       beats: [
-        "Midnight. An abandoned farmhouse. Rain.",
-        "Your squad caught an enemy scout. Lev Arkin. Nineteen years old.",
-        "He knows which roads to the coast are mined.",
-        "Without that, your company goes through the Tannen forest, where the patrols are.",
-        { who: "Lt. Harrow", text: "Get the safe road out of him. Whatever it takes." },
-        "He hands you a pair of pliers. Lev is crying."
+        "Midnight. Your unit hides in an abandoned farmhouse.",
+        "You’ve captured an enemy scout. His name is Lev Arkin. He’s nineteen.",
+        "He knows which roads to the coast are free of mines.",
+        "Without that, your unit has to go through the Tannen forest, which is full of enemy patrols.",
+        { who: "Lt. Harrow", text: "Make him tell you the safe road. Whatever it takes." },
+        "Harrow hands you a pair of pliers. Lev starts to cry."
       ],
       prompt: "Torture him?",
-      promptSub: "His pain, or your company’s lives.",
+      dilemma: "Is torture ever acceptable if it could save lives?",
       choices: [
         {
           key: "A",
           label: "Make him talk",
-          sub: "Whatever it takes.",
+          sub: "Torture him, as ordered.",
+          pro: "You might learn the safe road for your unit.",
+          con: "You torture a terrified prisoner. He might lie.",
           icon: "pliers",
           tags: { obey: true, ends: true },
           beats: [
             { text: "You don’t remember how long it took. You remember the sound.", variant: "dark" },
-            "By two in the morning, Lev draws the safe road with shaking hands.",
-            "He told the truth. Not one mine. Every soldier in your company lives."
+            "By two in the morning, Lev draws the safe road on your map with shaking hands.",
+            "He told the truth. Not a single mine. Everyone in your unit survives the night."
           ],
           next: "checkpoint"
         },
         {
           key: "B",
           label: "Refuse",
-          sub: "He’s a prisoner of war.",
+          sub: "Disobey. Treat him humanely.",
+          pro: "You don’t torture anyone.",
+          con: "Your unit must risk the forest.",
           icon: "shield",
           tags: { obey: false, ends: false },
           beats: [
-            "You put the pliers down. You give Lev your water.",
-            "Without the safe road, the company takes the forest.",
-            { text: "Three in the morning. Muzzle flashes in the trees. Harrow falls first.", scene: "forest", fx: "shots" },
-            "A rifle butt knocks you flat. You’ve been captured."
+            "You put the pliers down and give Lev some water.",
+            "Without the safe road, your unit goes through the forest.",
+            { text: "Three in the morning. Gunfire from the trees. Harrow is the first to fall.", scene: "forest", fx: "shots" },
+            "Someone knocks you to the ground. You’ve been captured."
           ],
           next: "captured"
         }
       ],
       debrief: {
         concept: "The ticking-bomb problem",
-        context: "Torture is banned by the Geneva Conventions, even under orders.",
+        context: "Torture is banned by the Geneva Conventions, even in war and even under orders.",
         lenses: {
-          util: { verdict: "A", text: "If it saves forty lives, one person’s pain is worth it." },
-          kant: { verdict: "B", text: "Torture uses a person purely as a tool. Never allowed." },
-          virtue: { verdict: "B", text: "Cruelty corrodes the person who does it." }
+          util: { verdict: "A", says: "If it saves forty soldiers, the pain is worth it.", text: "If torturing one person saves forty soldiers, the result is worth it. (Many utilitarians still worry that torture produces false information.)" },
+          kant: { verdict: "B", says: "Torture uses a person as a tool. Never OK.", text: "Torturing someone uses them purely as a tool to get what you want. Kant says that is always wrong, whatever it achieves." },
+          virtue: { verdict: "B", says: "Cruelty damages the person who does it.", text: "A good person is merciful. Torture turns you into someone cruel, even if it works." }
         },
-        question: "You didn’t know it would work. Should a choice be judged by what you knew, or how it turned out?"
+        question: "You didn’t know the torture would work. Should a choice be judged by what you knew at the time, or by how it turned out?"
       }
     },
 
@@ -170,25 +184,28 @@ window.STORY = {
       time: "00:40",
       km: 33,
       scene: "cellar",
+      theme: "Ends vs. means",
       beats: [
-        "A school cellar. Twelve refugees, and you.",
-        "Above you, boots on broken glass. An enemy patrol. They aren’t taking prisoners tonight.",
-        "Tomas is wounded and delirious. He’s moaning. Louder. Louder.",
-        "A woman presses her scarf into your hand. You know what she means.",
-        "Or you could run out the back and draw the patrol away. They might chase you. They might tear the block apart."
+        "You and the twelve refugees hide in the basement of a bombed school.",
+        "Above you, an enemy patrol is searching the building. If they find you, they’ll kill everyone.",
+        "Tomas, one of the refugees, is wounded and feverish. He’s moaning, louder and louder. The patrol will hear.",
+        "A woman hands you her scarf. She means: keep him quiet, even if it kills him.",
+        "Your other option: run out the back and make noise, so the patrol chases you instead."
       ],
       prompt: "Silence Tomas?",
-      promptSub: "One certain death, or a gamble with thirteen lives.",
+      dilemma: "Is it right to kill one innocent person to save many?",
       choices: [
         {
           key: "A",
           label: "Silence him",
-          sub: "Save the twelve.",
+          sub: "Hold the scarf over his mouth.",
+          pro: "The patrol won’t hear. Twelve people live.",
+          con: "Tomas will probably die, by your hands.",
           icon: "mute",
           tags: { obey: null, ends: true },
           beats: [
             "You hold the scarf over his mouth. He barely struggles.",
-            { text: "The boots stop. Someone laughs. The footsteps move on.", variant: "passed" },
+            { text: "The footsteps stop. Someone laughs. Then the patrol moves on.", variant: "passed" },
             "Twelve people climb out at dawn. Tomas doesn’t."
           ],
           next: "checkpoint"
@@ -196,14 +213,16 @@ window.STORY = {
         {
           key: "B",
           label: "Draw them away",
-          sub: "Risk yourself instead.",
+          sub: "Run out and make noise.",
+          pro: "You don’t kill anyone.",
+          con: "You’ll likely be caught. If the trick fails, all 13 die.",
           icon: "run",
           tags: { obey: null, ends: false },
           beats: [
-            { text: "You kick over barrels in the street. Every flashlight swings toward you.", fx: "shots", variant: "passed" },
+            { text: "You kick over barrels in the street. Every flashlight turns toward you.", fx: "shots", variant: "passed" },
             "You almost reach the trees.",
-            "The patrol never checks the school. Everyone in the cellar lives.",
-            "You’re marched to an enemy camp."
+            "The patrol never checks the school. Everyone in the basement lives.",
+            "You’re taken to an enemy camp."
           ],
           next: "captured"
         }
@@ -212,11 +231,11 @@ window.STORY = {
         concept: "The trolley problem, up close",
         context: "Based on the trolley problem by philosophers Philippa Foot and Judith Jarvis Thomson.",
         lenses: {
-          util: { verdict: "A", text: "One certain death beats risking thirteen." },
-          kant: { verdict: "B", text: "You may risk your own life. You may not take his." },
-          virtue: { verdict: "B", text: "Self-sacrifice is courage, as long as it isn’t reckless." }
+          util: { verdict: "A", says: "One death is better than risking thirteen.", text: "Silencing Tomas means one likely death instead of risking thirteen. The numbers favor it." },
+          kant: { verdict: "B", says: "You may risk your life, not take his.", text: "Killing an innocent person with your own hands is wrong. You may risk your own life, but you may not take his." },
+          virtue: { verdict: "B", says: "Protecting everyone yourself is the brave choice.", text: "Drawing the patrol away takes courage and protects everyone, Tomas included. A good person would try it." }
         },
-        question: "Why does it feel worse with your own hands than by pulling a lever?"
+        question: "Why does it feel worse to do it with your own hands than by pulling a lever?"
       }
     },
 
@@ -228,40 +247,45 @@ window.STORY = {
       time: "03:18",
       km: 9,
       scene: "checkpoint",
+      theme: "Orders vs. conscience",
       beats: [
-        "The last checkpoint before the harbor.",
-        "Enemy car bombs have been hitting checkpoints. Orders: any car that doesn’t stop, you shoot.",
-        "Headlights. A car, coming fast. You fire a warning shot. It doesn’t slow down.",
-        "In the back seat: a child? Or a bag?",
+        "The last checkpoint before the harbor. Major Voss is in charge.",
+        "Enemies have been driving car bombs into checkpoints. The order: if a car won’t stop, shoot.",
+        "A car is speeding toward you. You fire a warning shot. It doesn’t stop.",
+        "You can see a shape in the back seat. Maybe a child. Maybe a bomb.",
         { who: "Major Voss", text: "Fire! Fire, Wren!" }
       ],
       prompt: "Open fire?",
-      promptSub: "Thirty meters. Maybe a bomb. Maybe a family.",
+      dilemma: "Should you follow an order when you can’t be sure it’s right?",
       choices: [
         {
           key: "B",
           label: "Hold fire",
-          sub: "Defy the order.",
+          sub: "Disobey. Don’t shoot.",
+          pro: "If it’s a family, they live.",
+          con: "If it’s a bomb, everyone here dies.",
           icon: "hand",
           tags: { obey: false, ends: false },
           beats: [
-            { text: "The car skids into the sandbags.", variant: "stopped" },
-            "The brakes had failed. A father and his little boy. No bomb.",
+            { text: "The car skids into the sandbags and stops.", variant: "stopped" },
+            "Its brakes had failed. Inside: a father and his little boy. No bomb.",
             { who: "Major Voss", text: "You got lucky. Next time it’s a bomb, and we all die." },
-            { text: "You’re arrested. Then the shelling starts. You run for the cliffs.", fx: "boom" }
+            { text: "You’re arrested. Then the shelling starts, and you escape toward the cliffs.", fx: "boom" }
           ],
           next: "signal"
         },
         {
           key: "A",
           label: "Fire",
-          sub: "Obey. Protect the checkpoint.",
+          sub: "Follow the order.",
+          pro: "If it’s a bomb, you save the checkpoint.",
+          con: "If it’s a family, you kill them.",
           icon: "crosshair",
           tags: { obey: true, ends: true },
           beats: [
             { text: "Everyone on the line fires.", fx: "shots", variant: "stopped" },
-            "No bomb. A father whose brakes had failed, and his seven-year-old son.",
-            { who: "Major Voss", text: "Engagement per standing orders. Not your fault." },
+            "There was no bomb. The brakes had failed. Inside: a father and his seven-year-old son.",
+            { who: "Major Voss", text: "You followed orders. It’s not your fault." },
             "At dawn, a truck takes you down to the harbor."
           ],
           next: "boat"
@@ -269,13 +293,13 @@ window.STORY = {
       ],
       debrief: {
         concept: "Moral luck",
-        context: "At Nuremberg (1945–46), “I was following orders” was rejected as a defense.",
+        context: "At the Nuremberg trials (1945–46), “I was just following orders” was rejected as a defense.",
         lenses: {
-          util: { verdict: "A", text: "A real chance of a bomb justifies firing." },
-          kant: { verdict: "split", text: "Kant judges your intention, not the outcome. Kantians disagree about this rule." },
-          virtue: { verdict: "B", text: "A good soldier sees clearly, like Stanislav Petrov, who refused to report a false nuclear alarm in 1983." }
+          util: { verdict: "A", says: "A real bomb risk justifies firing.", text: "There was a real chance of a bomb. Firing protected the most people, based on what you knew." },
+          kant: { verdict: "split", says: "Your intention matters, not how it turned out.", text: "Kant judges your intention, not the result. Kantians disagree about whether “shoot any car that won’t stop” is a fair rule." },
+          virtue: { verdict: "B", says: "A good soldier thinks, not just obeys.", text: "A good soldier uses judgment, not just orders. In 1983, Soviet officer Stanislav Petrov trusted his judgment and ignored a false nuclear alarm." }
         },
-        question: "If it had been a bomb, would holding fire have been wrong?"
+        question: "If the car had held a bomb, would holding fire have been the wrong choice?"
       }
     },
 
@@ -286,40 +310,45 @@ window.STORY = {
       time: "03:55",
       km: 14,
       scene: "camp",
+      theme: "Ends vs. means",
       beats: [
-        "Ten prisoners kneel in the mud. You’re one of them.",
-        "A sniper killed one of the colonel’s men. His orders: shoot ten prisoners in revenge.",
-        { who: "Colonel Anselm", text: "Shoot one of them, and I let the other nine go. Including you." },
-        { who: "Colonel Anselm", text: "Refuse, and my men shoot all ten." },
+        "You’ve been captured. You kneel in the mud with nine other prisoners.",
+        "The enemy colonel plans to shoot all ten of you, as revenge for one of his soldiers.",
+        { who: "Colonel Anselm", text: "I’ll make you an offer. Shoot one prisoner yourself, and I let the other nine go." },
+        { who: "Colonel Anselm", text: "Refuse, and my men shoot all ten. You included." },
         { who: "Old fisherman", text: "Pick me. Please. I’m old." }
       ],
       prompt: "Take the pistol?",
-      promptSub: "Kill one innocent person to save nine.",
+      dilemma: "Would you kill one person to stop someone else from killing ten?",
       choices: [
         {
           key: "A",
           label: "Take the pistol",
-          sub: "One dies. Nine live.",
+          sub: "Shoot the old fisherman.",
+          pro: "Nine people live, including you.",
+          con: "You kill an innocent man.",
           icon: "pistol",
           tags: { obey: null, ends: true },
           beats: [
-            "Your hands shake so hard you need both of them.",
+            "Your hands shake so badly you need both of them.",
             { text: "The fisherman closes his eyes.", fx: "shot", variant: "shot" },
-            "The colonel keeps his word. Nine walk free at dawn.",
-            { who: "Colonel Anselm", text: "You see? War makes all of us into something." }
+            "The colonel keeps his word. At dawn, nine prisoners walk free.",
+            { who: "Colonel Anselm", text: "You see? War turns all of us into something." }
           ],
           next: "signal"
         },
         {
           key: "B",
           label: "Refuse",
-          sub: "You won’t be his executioner.",
+          sub: "Don’t become his executioner.",
+          pro: "You never kill anyone.",
+          con: "All ten are shot, including you.",
           icon: "cross",
           tags: { obey: null, ends: false },
           beats: [
             { who: "Colonel Anselm", text: "Then you have chosen for all of them." },
             "The rifles rise. The old fisherman takes your hand.",
-            { text: "You never became a murderer. Ten died instead of one.", fx: "volley" }
+            { text: "You never became a murderer. Ten people died instead of one.", fx: "volley" }
           ],
           ending: "clean_hands"
         }
@@ -328,11 +357,11 @@ window.STORY = {
         concept: "Integrity: “Jim and the Indians”",
         context: "Adapted from a 1973 thought experiment by philosopher Bernard Williams.",
         lenses: {
-          util: { verdict: "A", text: "One death is better than ten." },
-          kant: { verdict: "B", text: "If you shoot, the murder is yours. If you refuse, it’s his." },
-          virtue: { verdict: "split", text: "Honoring the old man’s sacrifice, or becoming the colonel’s tool?" }
+          util: { verdict: "A", says: "One death is better than ten.", text: "One death is better than ten. Refusing just to keep your own hands clean costs nine extra lives." },
+          kant: { verdict: "B", says: "If you shoot, the murder is yours.", text: "If you shoot, you are the murderer. If you refuse, the colonel is responsible for what he chooses to do." },
+          virtue: { verdict: "split", says: "Honor his sacrifice, or refuse to be used?", text: "The old man volunteered. Is shooting him mercy, or letting the colonel turn you into his weapon? Thinkers disagree." }
         },
-        question: "If the colonel kills ten because you refused, did you cause it?"
+        question: "If the colonel kills ten people because you refused, is that your fault?"
       }
     },
 
@@ -344,20 +373,23 @@ window.STORY = {
       time: "05:40",
       km: 0,
       scene: "harbor",
+      theme: "Orders vs. conscience",
       beats: [
-        "The last ship, the Aurora. Shells are hitting the outer docks.",
-        "Your orders: guard the gangplank. Soldiers only. The ship is full.",
-        "A mother pushes through the crowd with a little girl. Her name tag says MIRA.",
-        { who: "Mira’s mother", text: "Please. Just her. She’s small." },
-        "If one more person gets on, someone has to get off. The only one not counted yet is you."
+        "Saltmarsh Harbor. The last ship out, the Aurora, is almost full. Shells are landing nearby.",
+        "Your order: guard the boarding ramp. Only soldiers may get on now.",
+        "A mother pushes through the crowd with her six-year-old daughter, Mira.",
+        { who: "Mira’s mother", text: "Please. Just take her. She’s small." },
+        "There’s room for exactly one more person: you. If Mira takes your place, you stay behind."
       ],
       prompt: "Give up your place?",
-      promptSub: "Hold the line and live, or trade your seat for hers.",
+      dilemma: "Do you owe a stranger your life?",
       choices: [
         {
           key: "A",
           label: "Hold the line",
-          sub: "Obey. Board last. Live.",
+          sub: "Obey. Board the ship yourself.",
+          pro: "You escape and live.",
+          con: "Mira is left behind.",
           icon: "ship",
           tags: { obey: true, ends: true },
           beats: [
@@ -370,26 +402,28 @@ window.STORY = {
         {
           key: "B",
           label: "Give her your place",
-          sub: "She goes. You stay.",
+          sub: "Disobey. Put Mira on the ship.",
+          pro: "Mira escapes.",
+          con: "You’re left behind under the shelling.",
           icon: "child",
           tags: { obey: false, ends: false },
           beats: [
             "You lift Mira onto the deck and step back onto the dock.",
             { text: "The Aurora pulls away. A little girl waves from the rail.", variant: "departing" },
-            { text: "Twenty minutes later, the shells reach the inner docks.", fx: "barrage" }
+            { text: "Twenty minutes later, the shells reach the dock.", fx: "barrage" }
           ],
           ending: "miras_place"
         }
       ],
       debrief: {
         concept: "Duty vs. going beyond duty",
-        context: "Evacuations like Dunkirk (1940) and Saigon (1975) forced the same choice.",
+        context: "Evacuations like Dunkirk (1940) and Saigon (1975) forced the same choice about who gets a place.",
         lenses: {
-          util: { verdict: "A", text: "A trained soldier may save many lives in the war to come." },
-          kant: { verdict: "A", text: "Your oath holds. Giving up your life is allowed, but not required." },
-          virtue: { verdict: "B", text: "Compassion and courage point toward giving her your place." }
+          util: { verdict: "A", says: "A soldier can save many more lives later.", text: "A trained soldier can save many more lives in the war to come. Holding the line gives the best overall outcome." },
+          kant: { verdict: "A", says: "Your duty is your post. Sacrifice is optional.", text: "Your duty is to your post. Giving up your life for a stranger is allowed, but not required." },
+          virtue: { verdict: "B", says: "Compassion and courage say: give her your place.", text: "Compassion and courage both point toward giving Mira your place." }
         },
-        question: "Can morality demand your life, or only ask for it?"
+        question: "Can morality demand that you give up your life, or can it only ask?"
       }
     },
 
@@ -400,52 +434,57 @@ window.STORY = {
       time: "05:22",
       km: 2,
       scene: "lighthouse",
+      theme: "Ends vs. means",
       beats: [
-        "An empty lighthouse. A working radio.",
+        "You reach an empty lighthouse above the harbor. It has a working radio.",
         "Below you, thousands of people are boarding the last ships.",
-        "On the hill, the enemy guns are shelling them, hidden inside a village.",
-        { who: "Allied Command · radio", text: "Any station. Give us coordinates and we’ll hit those guns." },
-        "The moment you transmit, they’ll trace your signal to this lighthouse."
+        "Enemy guns on a hill are shelling them. The guns are hidden inside a village full of civilians.",
+        { who: "Allied Command · radio", text: "Anyone out there: give us the location and we’ll bomb those guns." },
+        "If you use the radio, the enemy will track the signal to you."
       ],
       prompt: "Call in the strike?",
-      promptSub: "Save the evacuation. Destroy the village, and probably yourself.",
+      dilemma: "Is it right to kill innocent people as a side effect of saving more?",
       choices: [
         {
           key: "A",
           label: "Call it in",
-          sub: "Save thousands.",
+          sub: "Radio the location.",
+          pro: "The guns stop. Thousands escape.",
+          con: "The village is destroyed. The enemy will find you.",
           icon: "radio",
           tags: { obey: true, ends: true },
           beats: [
-            "You read the coordinates twice, the way you were trained.",
+            "You read out the location twice, the way you were trained.",
             { text: "The hill turns white. The guns go silent. The ships sail.", fx: "barrage", variant: "strike" },
-            { text: "Then you hear the shell coming for the lighthouse.", fx: "incoming" }
+            { text: "Then you hear a shell coming for the lighthouse.", fx: "incoming" }
           ],
           ending: "coordinates"
         },
         {
           key: "B",
           label: "Stay silent",
-          sub: "Spare the village. Live.",
+          sub: "Say nothing and slip away.",
+          pro: "The village is spared. You get away.",
+          con: "The guns keep firing on the ships.",
           icon: "radiooff",
           tags: { obey: false, ends: false },
           beats: [
             { text: "You switch off the radio and climb down to a fishing boat.", scene: "survive" },
-            "By sunrise you’re out of range.",
+            "By sunrise you’re safely out to sea.",
             "Weeks later you learn that two evacuation ships never left the harbor."
           ],
           ending: "silent_radio"
         }
       ],
       debrief: {
-        concept: "Proportionality & human shields",
-        context: "The laws of war allow strikes on military targets if civilian harm is proportionate.",
+        concept: "Side effects & human shields",
+        context: "The laws of war allow strikes on military targets if the harm to civilians isn’t out of proportion.",
         lenses: {
-          util: { verdict: "A", text: "Thousands of evacuees against one village." },
-          kant: { verdict: "A", text: "The guns are the target. The deaths are foreseen, not intended (double effect)." },
-          virtue: { verdict: "A", text: "Courage means facing death for something worth it." }
+          util: { verdict: "A", says: "Thousands saved outweighs one village.", text: "Saving thousands of evacuees outweighs the loss of one village. Call the strike." },
+          kant: { verdict: "A", says: "You target the guns. Deaths are a side effect.", text: "The guns are the target. The deaths in the village are a side effect, not your goal. This idea is called the doctrine of double effect." },
+          virtue: { verdict: "A", says: "Courage means risking yourself for others.", text: "Courage means risking yourself for others. Staying silent to save yourself is hard to call brave." }
         },
-        question: "The enemy hid its guns among civilians. If they die, who is responsible?"
+        question: "The enemy hid its guns among civilians. If those civilians die, who is responsible?"
       }
     }
   },
@@ -460,9 +499,9 @@ window.STORY = {
 
   // The ethical profile at the end: which school of thought your choices sit closest to
   frameworks: {
-    util: { name: "Utilitarianism", short: "Utilitarian", who: "Bentham · Mill", idea: "Do what brings the best results for the most people." },
-    kant: { name: "Kantian ethics", short: "Kantian", who: "Immanuel Kant", idea: "Some acts are wrong, whatever the results. Never use people as tools." },
-    virtue: { name: "Virtue ethics", short: "Virtue", who: "Aristotle", idea: "Do what a good person would do, and ask what each choice makes you." }
+    util: { name: "Utilitarianism", short: "Utilitarian", who: "Bentham · Mill", motto: "Best result for the most people" },
+    kant: { name: "Kantian ethics", short: "Kantian", who: "Immanuel Kant", motto: "Some acts are always wrong" },
+    virtue: { name: "Virtue ethics", short: "Virtue ethics", who: "Aristotle", motto: "What would a good person do?" }
   },
   profiles: {
     util: { label: "a Utilitarian", text: "You judged choices by their results. When harm bought a better outcome, you paid the price." },
