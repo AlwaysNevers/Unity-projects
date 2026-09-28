@@ -1,15 +1,42 @@
 /*
   LAST ORDERS — game flow
-  Title → intro → four dilemmas → ending → debrief.
+  Title → opening → (map → chapter card → scene → decision → consequence
+  → philosophers react) × 4 → ending → moral profile.
 */
 (function () {
   const S = window.STORY;
   const A = window.AudioFX;
   const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const ROMAN = ["", "I", "II", "III", "IV"];
-  const LENS_NAMES = { util: "Utilitarianism", kant: "Kantian deontology", virtue: "Virtue ethics" };
-  const ENDING_ORDER = ["last_aboard", "miras_place", "silent_radio", "coordinates", "clean_hands"];
+  const FW = ["util", "kant", "virtue"];
+  const ENDING_ORDER = ["last_aboard", "silent_radio", "miras_place", "coordinates", "clean_hands"];
+  const HOLD_MS = 900;
+  const DECIDE_MS = 20000;
 
+  /* ───────── icons (24×24 line drawings) ───────── */
+  const ICONS = {
+    detonator: '<path d="M4 13h16v7H4z"/><path d="M12 13V6M8 6h8M7 16.5h2"/>',
+    hourglass: '<path d="M6 3h12M6 21h12"/><path d="M7 3c0 6 10 6 10 9s-10 3-10 9"/><path d="M17 3c0 6-10 6-10 9s10 3 10 9"/>',
+    pliers: '<path d="M9 3l2 8M15 3l-2 8"/><circle cx="12" cy="12" r="1.5"/><path d="M11 13l-4 8M13 13l4 8"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    mute: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/>',
+    run: '<path d="M10 4H5v16h5"/><path d="M14 8l4 4-4 4M18 12H9"/>',
+    hand: '<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5"/><path d="M11 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M14 11V6a1.5 1.5 0 0 1 3 0v8c0 4-3 7-6.5 7-2.5 0-4.2-1.4-5.3-3.4L3.4 14a1.5 1.5 0 0 1 2.5-1.6L8 15"/>',
+    crosshair: '<circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1"/>',
+    pistol: '<path d="M3 8h16l2 2v3h-9l-1.2 5H7.5l1.2-5H5a2 2 0 0 1-2-2z"/><path d="M12 13c0 1.2.8 2 2 2"/>',
+    cross: '<circle cx="12" cy="12" r="9"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/>',
+    ship: '<path d="M3 15l2 5h14l2-5z"/><path d="M6 15v-4h12v4M9 11V7h4v4M11 7V4"/>',
+    child: '<circle cx="12" cy="5.5" r="2.5"/><path d="M12 8v7M8 11l4-2 4 2M9 21l3-6 3 6"/>',
+    radio: '<path d="M12 11v10M9 21h6M10 21l2-10 2 10"/><circle cx="12" cy="9" r="1.5"/><path d="M8.5 5.5a5 5 0 0 1 7 0M6 3a8.5 8.5 0 0 1 12 0"/>',
+    radiooff: '<path d="M12 11v10M9 21h6M10 21l2-10 2 10"/><circle cx="12" cy="9" r="1.5"/><path d="M3 3l18 18"/>',
+    util: '<path d="M12 3v17M7 20h10M4 7h16"/><path d="M4 7L1.5 13h5zM20 7l-2.5 6h5z"/>',
+    kant: '<path d="M3 21h18M5 18h14M4 8h16L12 3z"/><path d="M6.5 18V8M10 18V8M14 18V8M17.5 18V8"/>',
+    virtue: '<path d="M12 21c-4-1.5-7-5.5-7-11M12 21c4-1.5 7-5.5 7-11"/><path d="M5 10c-1.5-1-2-2.5-1.8-4 1.5.2 2.6 1.3 2.8 3M6.5 14c-2-.5-3-2-3.2-3.5 1.6 0 3 1 3.5 2.6M8.6 17.4c-2 .1-3.5-.9-4-2.3 1.6-.4 3.2.3 4 1.6M19 10c1.5-1 2-2.5 1.8-4-1.5.2-2.6 1.3-2.8 3M17.5 14c2-.5 3-2 3.2-3.5-1.6 0-3 1-3.5 2.6M15.4 17.4c2 .1 3.5-.9 4-2.3-1.6-.4-3.2.3-4 1.6"/>'
+  };
+  const svgIcon = (name, cls = "") =>
+    `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+
+  /* ───────── dom helpers ───────── */
   const $ = (sel) => document.querySelector(sel);
   const el = (tag, cls, text) => {
     const e = document.createElement(tag);
@@ -17,19 +44,33 @@
     if (text != null) e.textContent = text;
     return e;
   };
+  const html = (tag, cls, markup) => {
+    const e = el(tag, cls);
+    e.innerHTML = markup;
+    return e;
+  };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, REDUCED ? Math.min(ms, 150) : ms));
 
   const body = document.body;
-  const panel = $("#panel");
-  const inner = $("#panelInner");
-  const titleEl = $("#title");
+  const card = $("#card");
+  const caption = $("#caption");
+  const whoEl = $("#who");
+  const lineEl = $("#line");
+  const promptEl = $("#prompt");
+  const choicesEl = $("#choices");
+  const reactEl = $("#react");
+  const toastEl = $("#toast");
   const endingEl = $("#ending");
   const doc = $("#doc");
   const docInner = $("#docInner");
+  const hudObj = $(".hud-obj");
 
-  const state = { history: [], ending: null };
-  let typing = null; // active typewriter
-  let keyChoices = null; // choices available for number keys
-  let returnTo = null;
+  const state = { history: [], ending: null, visited: [], km: 40 };
+  let runId = 0;
+  let advanceFn = null;
+  let typing = null;
+  let holdHandles = null;
+  let curScene = "title";
 
   /* ───────── saved endings (per browser) ───────── */
   const KEY = "lastOrders.endings";
@@ -50,255 +91,348 @@
     }
   };
 
-  /* ───────── scene layout ───────── */
+  /* ───────── scene renderer ───────── */
   function layout(w, h) {
-    const wide = w >= 860;
-    if (body.dataset.mode === "panel") {
-      if (wide) {
-        const pw = Math.min(600, Math.max(420, w * 0.42));
-        return { cx: (w - pw) / 2, availW: w - pw, top: 0, bottom: h * 0.9 };
-      }
-      return { cx: w / 2, availW: w, top: 0, bottom: h * 0.4 };
-    }
-    return { cx: w / 2, availW: w, top: 0, bottom: h * (wide ? 0.9 : 0.75) };
+    const portrait = w < h * 0.95;
+    return portrait ? { cx: w / 2, availW: w, bottom: h * 0.64, portrait } : { cx: w / 2, availW: w, bottom: h * 0.9, portrait };
   }
   const renderer = new window.SceneRenderer($("#scene"), layout);
-  const origSwap = renderer.swap.bind(renderer);
-  renderer.swap = function () {
-    origSwap();
-    renderer.resize(); // re-frame the stage for the new mode while the screen is black
-  };
+  function scene(name, opts) {
+    curScene = name;
+    renderer.set(name, opts || {});
+  }
 
-  function screen(name, mode) {
+  function screen(name) {
     body.dataset.screen = name;
-    body.dataset.mode = mode;
-    titleEl.hidden = name !== "title";
-    panel.hidden = mode !== "panel";
+    $("#title").hidden = name !== "title";
     endingEl.hidden = name !== "ending";
     doc.hidden = name !== "doc";
-    keyChoices = null;
-    A.heartbeat(false);
-  }
-
-  function pips(ch) {
-    document.querySelectorAll("#pips li").forEach((li, i) => {
-      li.className = i + 1 < ch ? "done" : i + 1 === ch ? "now" : "";
-    });
-  }
-
-  /* ───────── panel transitions + typewriter ───────── */
-  function swapPanel(build) {
-    stopTyping();
-    const go = () => {
-      inner.replaceChildren();
-      inner.classList.remove("leaving");
-      build(inner);
-      inner.classList.remove("entering");
-      void inner.offsetWidth;
-      inner.classList.add("entering");
-      panel.scrollTop = 0;
-    };
-    if (panel.hidden || !inner.childElementCount) go();
-    else {
-      inner.classList.add("leaving");
-      setTimeout(go, REDUCED ? 0 : 420);
+    if (name !== "play") {
+      [card, caption, promptEl, choicesEl, reactEl].forEach((e) => (e.hidden = true));
+      cinema(false);
     }
   }
+  const cinema = (on) => body.classList.toggle("cinema", on);
 
-  function stopTyping() {
-    if (typing) typing.cancel();
-    typing = null;
+  function toast(text) {
+    toastEl.hidden = true;
+    toastEl.textContent = text;
+    void toastEl.offsetWidth;
+    toastEl.hidden = false;
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => (toastEl.hidden = true), 1900);
   }
 
-  // Types paragraphs into container. The full text is laid out from the
-  // start (the unrevealed part is transparent) so nothing jumps around.
-  function typeText(container, paras, done) {
-    const parts = paras.map((t) => {
-      const p = el("p");
-      const shown = el("span");
-      const ghost = el("span", "ghost", t);
-      p.append(shown, ghost);
-      container.append(p);
-      return { t, shown, ghost };
-    });
-    let cancelled = false;
-    const finish = () => {
-      if (cancelled) return;
-      cancelled = true;
-      parts.forEach((p) => {
-        p.shown.textContent = p.t;
-        p.ghost.textContent = "";
-      });
-      typing = null;
-      done();
-    };
-    typing = {
-      finish,
-      cancel() {
-        cancelled = true;
-      }
-    };
-    if (REDUCED) return finish();
-    const CPS = 90;
-    let i = 0,
-      c = 0,
-      budget = 0,
-      last = performance.now();
+  /* ───────── HUD ───────── */
+  function hudTime(time) {
+    $("#clock").textContent = time;
+  }
+  function hudKm(target, ms = 1800) {
+    const from = state.km;
+    const t0 = performance.now();
     const step = (now) => {
-      if (cancelled) return;
-      budget += ((now - last) / 1000) * CPS;
-      last = now;
-      while (budget >= 1 && i < parts.length) {
-        const p = parts[i];
-        c++;
-        budget--;
-        if (c > p.t.length) {
-          i++;
-          c = 0;
-          budget -= 22; // short pause between paragraphs
-          continue;
-        }
-        const ch = p.t[c - 1];
-        if (ch === "." || ch === "?" || ch === "!") budget -= 5;
-        p.shown.textContent = p.t.slice(0, c);
-        p.ghost.textContent = p.t.slice(c);
-      }
-      if (i >= parts.length) finish();
-      else requestAnimationFrame(step);
+      const p = Math.min(1, (now - t0) / ms);
+      state.km = Math.round(from + (target - from) * p);
+      $("#km").textContent = `${state.km} km`;
+      if (p < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
   }
 
-  function continueButton(label, onClick) {
-    const row = el("div", "row-end");
-    const b = el("button", "btn primary pending-btn", label);
-    b.type = "button";
-    b.disabled = true;
-    b.addEventListener("click", () => {
-      A.click();
-      onClick();
+  /* ───────── waiting for the player ───────── */
+  function waitAdvance(ms) {
+    return new Promise((res) => {
+      let tm = null;
+      const finish = () => {
+        clearTimeout(tm);
+        if (advanceFn === finish) advanceFn = null;
+        res();
+      };
+      advanceFn = finish;
+      if (ms) tm = setTimeout(finish, REDUCED ? ms / 2 : ms);
     });
-    row.append(b);
-    return {
-      row,
-      reveal() {
-        b.disabled = false;
-        b.classList.remove("pending-btn");
-        b.animate && !REDUCED && b.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500 });
-        b.focus({ preventScroll: true });
-        row.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+  }
+  function advance() {
+    if (typing) return typing.finish();
+    if (advanceFn) advanceFn();
+  }
+
+  /* ───────── subtitles ───────── */
+  function say(beat) {
+    return new Promise((done) => {
+      caption.hidden = false;
+      caption.classList.remove("ready");
+      whoEl.textContent = beat.who || "";
+      lineEl.classList.toggle("quote", !!beat.who);
+      const shown = el("span");
+      const ghost = el("span", "ghost", beat.text);
+      lineEl.replaceChildren(shown, ghost);
+      const text = beat.text;
+      let cancelled = false;
+      const finish = () => {
+        if (cancelled) return;
+        cancelled = true;
+        typing = null;
+        shown.textContent = text;
+        ghost.textContent = "";
+        caption.classList.add("ready");
+        done();
+      };
+      typing = { finish };
+      if (REDUCED) return finish();
+      let c = 0,
+        budget = 0,
+        last = performance.now();
+      const step = (now) => {
+        if (cancelled) return;
+        budget += ((now - last) / 1000) * 48;
+        last = now;
+        while (budget >= 1 && c < text.length) {
+          c++;
+          budget--;
+          const ch = text[c - 1];
+          if (ch === "." || ch === "?" || ch === "!") budget -= 6;
+        }
+        shown.textContent = text.slice(0, c);
+        ghost.textContent = text.slice(c);
+        if (c >= text.length) finish();
+        else requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  async function playBeats(beats, id) {
+    for (const b of beats) {
+      const beat = typeof b === "string" ? { text: b } : b;
+      if (beat.scene && beat.scene !== curScene) {
+        caption.hidden = true;
+        scene(beat.scene);
+        await sleep(1100);
+        if (id !== runId) return false;
       }
-    };
+      if (beat.variant) scene(curScene, { variant: beat.variant });
+      if (beat.fx) renderer.fx(beat.fx);
+      await say(beat);
+      if (id !== runId) return false;
+      await waitAdvance();
+      if (id !== runId) return false;
+    }
+    caption.hidden = true;
+    return true;
   }
 
-  function skipHint() {
-    const h = el("p", "hint", "Tap or press Space to skip");
-    return h;
+  /* ───────── title cards ───────── */
+  async function showCard(children, ms, id) {
+    card.hidden = false;
+    card.classList.remove("out");
+    card.replaceChildren(...children);
+    await waitAdvance(ms);
+    if (id !== runId) return false;
+    card.classList.add("out");
+    await sleep(500);
+    card.hidden = true;
+    return id === runId;
   }
 
-  /* ───────── title ───────── */
-  function showTitle() {
-    screen("title", "full");
-    renderer.set("title");
-    const n = found.get().length;
-    $("#found").textContent = n ? `Endings found: ${n} of ${ENDING_ORDER.length}` : `${ENDING_ORDER.length} endings to find.`;
+  /* ───────── the opening ───────── */
+  async function opening(id) {
+    screen("play");
+    cinema(true);
+    scene("title");
+    hudTime("21:40");
+    state.km = 40;
+    $("#km").textContent = "40 km";
+    await sleep(600);
+    for (const c of S.opening) {
+      if (c.fx) renderer.fx(c.fx);
+      if (!(await showCard([el("p", "card-big", c.big), el("p", "card-small", c.small)], 3400, id))) return false;
+    }
+    hudObj.classList.remove("flash");
+    void hudObj.offsetWidth;
+    hudObj.classList.add("flash");
+    toast("New objective: reach Saltmarsh Harbor");
+    if (A) A.blip();
+    await sleep(900);
+    return id === runId;
   }
 
-  /* ───────── intro ───────── */
-  function showIntro(i) {
-    screen("intro", "panel");
-    pips(0);
-    renderer.set("intro");
-    const card = S.intro[i];
-    swapPanel((box) => {
-      const head = el("div", "node-head");
-      head.append(el("p", "dispatch", `Briefing ${i + 1} / ${S.intro.length}`), el("h2", "kicker", card.kicker));
-      const story = el("div", "story");
-      const last = i === S.intro.length - 1;
-      const cont = continueButton(last ? "Take your post" : "Continue", () => (last ? showNode(S.start) : showIntro(i + 1)));
-      const hint = skipHint();
-      box.append(head, story, cont.row, hint);
-      typeText(story, card.text, () => {
-        hint.remove();
-        cont.reveal();
-      });
-    });
+  /* ───────── travel on the map ───────── */
+  async function travel(from, to, id) {
+    const node = S.nodes[to];
+    const fromCh = from === "veyra" ? 0 : S.nodes[from].chapter;
+    cinema(true);
+    caption.hidden = true;
+    scene("map", { from, to, fromCh, toCh: node.chapter, visited: state.visited.slice() });
+    await sleep(700);
+    if (id !== runId) return false;
+    hudTime(node.time);
+    hudKm(node.km);
+    await say({ who: "En route", text: `${node.place} · ${node.time}` });
+    await waitAdvance(3200);
+    caption.hidden = true;
+    return id === runId;
   }
 
-  /* ───────── dilemma ───────── */
-  function showNode(id) {
-    const node = S.nodes[id];
-    screen("node", "panel");
-    pips(node.chapter);
-    renderer.set(node.scene);
-    swapPanel((box) => {
-      const head = el("div", "node-head");
-      const h = el("h2", "node-title");
-      h.append(el("span", "num", ROMAN[node.chapter]), document.createTextNode(node.title));
-      head.append(el("p", "dispatch", node.dispatch), h);
-      const story = el("div", "story");
-      const list = el("div", "choices pending");
-      const buttons = node.choices.map((c, idx) => {
+  /* ───────── one chapter ───────── */
+  async function playNode(nodeId, id) {
+    const node = S.nodes[nodeId];
+    state.visited.push(nodeId);
+    scene(node.scene);
+    await sleep(1000);
+    if (id !== runId) return;
+    const ok = await showCard(
+      [el("p", "card-k", `Chapter ${ROMAN[node.chapter]}`), el("h2", "card-title", node.title), el("p", "card-sub", `${node.place} · ${node.time}`)],
+      2800,
+      id
+    );
+    if (!ok) return;
+    cinema(false);
+    if (!(await playBeats(node.beats, id))) return;
+
+    const choice = await decide(node, id);
+    if (!choice || id !== runId) return;
+    state.history.push({ node, choice });
+
+    cinema(true);
+    if (!(await playBeats(choice.beats, id))) return;
+    await philosophersReact(node, choice, id);
+    if (id !== runId) return;
+
+    if (choice.ending) return showEnding(choice.ending);
+    if (!(await travel(nodeId, choice.next, id))) return;
+    return playNode(choice.next, id);
+  }
+
+  /* ───────── the decision ───────── */
+  function decide(node, id) {
+    return new Promise((resolve) => {
+      renderer.push(true);
+      $("#promptK").textContent = `Decision ${ROMAN[node.chapter]} of IV`;
+      $("#promptQ").textContent = node.prompt;
+      $("#promptSub").textContent = node.promptSub;
+      promptEl.classList.remove("urgent");
+      promptEl.hidden = false;
+      const bar = $("#timerBar");
+      bar.style.width = "100%";
+
+      choicesEl.replaceChildren();
+      choicesEl.classList.remove("done");
+      choicesEl.hidden = false;
+      let decided = false;
+      const t0 = performance.now();
+      if (A) A.heartbeat(true, 1);
+
+      const tick = (now) => {
+        if (decided || id !== runId) return;
+        const p = Math.min(1, (now - t0) / DECIDE_MS);
+        bar.style.width = `${(1 - p) * 100}%`;
+        if (A) A.setHeartRate(1 + p * 1.3);
+        if (p >= 1) promptEl.classList.add("urgent");
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+
+      const buttons = node.choices.map((c, i) => {
         const b = el("button", "choice");
         b.type = "button";
-        b.disabled = true;
-        b.append(el("span", "key", String(idx + 1)), el("span", "c-label", c.label), el("span", "c-sub", c.sub));
-        b.addEventListener("click", () => choose(node, c, b, list));
-        list.append(b);
+        b.setAttribute("aria-label", `${c.label}. ${c.sub} Hold to choose.`);
+        b.append(
+          html("span", "", svgIcon(c.icon, "ico")).firstChild,
+          el("span", "c-label", c.label),
+          el("span", "c-sub", c.sub),
+          html("span", "c-hold", `Hold <b>${i + 1}</b>`)
+        );
+        b._hold = holdable(b, () => commit(c, b));
+        choicesEl.append(b);
         return b;
       });
-      const hint = skipHint();
-      box.append(head, story, list, hint);
-      typeText(story, node.text, () => {
-        hint.remove();
-        list.classList.remove("pending");
-        list.classList.add("shown");
-        buttons.forEach((b) => (b.disabled = false));
-        list.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" });
-        keyChoices = buttons;
-        A.heartbeat(true);
-      });
+      holdHandles = buttons.map((b) => b._hold);
+
+      function commit(c, b) {
+        if (decided) return;
+        decided = true;
+        holdHandles = null;
+        if (A) {
+          A.heartbeat(false);
+          A.commit();
+        }
+        renderer.push(false);
+        renderer.whiteout(0.18);
+        choicesEl.classList.add("done");
+        b.classList.add("picked");
+        buttons.filter((x) => x !== b).forEach((x) => x.classList.add("dropped"));
+        setTimeout(() => {
+          promptEl.hidden = true;
+          choicesEl.hidden = true;
+          resolve(c);
+        }, REDUCED ? 200 : 1000);
+      }
     });
   }
 
-  function choose(node, choice, button, list) {
-    if (list.classList.contains("locked")) return;
-    keyChoices = null;
-    A.heartbeat(false);
-    A.click();
-    list.classList.add("locked");
-    button.classList.add("picked");
-    list.querySelectorAll("button").forEach((b) => (b.disabled = true));
-    state.history.push({ node: node, choice });
-
-    if (choice.variant) renderer.set(node.scene, { variant: choice.variant });
-    if (choice.fx === "explosion") setTimeout(() => renderer.explode(520, 380, 1.2), 250);
-    if (choice.fx === "shots") renderer.muzzle();
-    if (choice.fx === "barrage") setTimeout(() => renderer.barrage(), 600);
-
-    setTimeout(() => showResult(node, choice), REDUCED ? 300 : 1300);
+  // Press and hold to commit, so each choice has weight
+  function holdable(btn, onDone) {
+    let start = 0,
+      raf = 0,
+      holding = false;
+    const tick = () => {
+      const p = Math.min(1, (performance.now() - start) / HOLD_MS);
+      btn.style.setProperty("--p", p);
+      if (p >= 1) {
+        holding = false;
+        btn.classList.remove("holding");
+        onDone();
+      } else raf = requestAnimationFrame(tick);
+    };
+    const down = () => {
+      if (holding || choicesEl.classList.contains("done")) return;
+      holding = true;
+      start = performance.now();
+      btn.classList.add("holding");
+      if (A) A.holdStart(HOLD_MS);
+      raf = requestAnimationFrame(tick);
+    };
+    const up = () => {
+      if (!holding) return;
+      holding = false;
+      cancelAnimationFrame(raf);
+      btn.classList.remove("holding");
+      btn.style.setProperty("--p", 0);
+      if (A) A.holdStop();
+      toast("Hold to decide");
+    };
+    btn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      try {
+        btn.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      down();
+    });
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => btn.addEventListener(ev, up));
+    btn.addEventListener("contextmenu", (e) => e.preventDefault());
+    return { down, up };
   }
 
-  function showResult(node, choice) {
-    screen("result", "panel");
-    swapPanel((box) => {
-      const head = el("div", "node-head");
-      const h = el("h2", "node-title");
-      h.append(el("span", "num", ROMAN[node.chapter]), document.createTextNode(node.title));
-      head.append(el("p", "dispatch", node.dispatch), h);
-      const chose = el("p", "you-chose", "You chose: ");
-      chose.append(el("b", null, choice.label));
-      const story = el("div", "story");
-      const cont = choice.ending
-        ? continueButton("…", () => showEnding(choice.ending))
-        : continueButton("Continue", () => showNode(choice.next));
-      const hint = skipHint();
-      box.append(head, chose, story, cont.row, hint);
-      typeText(story, choice.result, () => {
-        hint.remove();
-        cont.reveal();
-      });
+  /* ───────── the philosophers react ───────── */
+  function verdictOf(lens, choice) {
+    if (lens.verdict === "split") return "split";
+    return lens.verdict === choice.key ? "agree" : "disagree";
+  }
+  async function philosophersReact(node, choice, id) {
+    const medals = el("div", "medals");
+    FW.forEach((k) => {
+      const v = verdictOf(node.debrief.lenses[k], choice);
+      const m = el("div", `medal ${v}`);
+      m.append(html("div", "disc", svgIcon(k)), el("span", "medal-name", S.frameworks[k].short), el("span", "medal-v", v === "agree" ? "Agrees" : v === "disagree" ? "Disagrees" : "Divided"));
+      medals.append(m);
     });
+    reactEl.replaceChildren(el("p", "react-k", "The philosophers react"), el("p", "react-choice", choice.label), medals);
+    reactEl.hidden = false;
+    if (A) [0, 350, 700].forEach((d) => setTimeout(() => A.click(), d));
+    await sleep(900);
+    await waitAdvance(5000);
+    reactEl.hidden = true;
   }
 
   /* ───────── ending ───────── */
@@ -306,294 +440,329 @@
     const e = S.endings[id];
     state.ending = id;
     found.add(id);
-    screen("ending", "full");
-    renderer.set(e.survived ? "survive" : "death");
-    A.sting(e.survived ? "survive" : "death");
-    endingEl.replaceChildren();
-    const made = state.history.length;
-    endingEl.append(
-      el("p", "dispatch", `Decisions made: ${made} of 4`),
+    screen("ending");
+    scene(e.survived ? "survive" : "death");
+    if (A) A.sting(e.survived ? "survive" : "death");
+    endingEl.replaceChildren(
+      el("p", "dispatch", `Decisions made: ${state.history.length} of 4`),
       el("h1", `verdict ${e.survived ? "live" : "die"}`, e.survived ? "You survived" : "You did not survive"),
       el("p", "ending-name", `Ending: ${e.title}`),
       el("p", "epitaph", e.epitaph)
     );
-    const b = el("button", "btn primary", "See what your choices meant");
+    const b = el("button", "btn primary", "See your moral profile");
     b.type = "button";
     b.addEventListener("click", () => {
-      A.click();
-      showDebrief();
+      if (A) A.click();
+      showReport();
     });
     endingEl.append(b);
-    setTimeout(() => b.focus({ preventScroll: true }), REDUCED ? 0 : 3500);
+    setTimeout(() => b.focus({ preventScroll: true }), REDUCED ? 0 : 3400);
   }
 
-  /* ───────── debrief ───────── */
-  function computeProfile() {
-    let ob = 0,
-      obN = 0,
-      en = 0;
-    const fw = { util: [0, 0], kant: [0, 0], virtue: [0, 0] };
-    state.history.forEach(({ node, choice }) => {
-      if (choice.tags.obey !== null) {
-        obN++;
-        if (choice.tags.obey) ob++;
-      }
-      if (choice.tags.ends) en++;
-      for (const k in fw) {
-        const v = node.debrief.lenses[k].verdict;
-        if (v === "split") continue;
-        fw[k][1]++;
-        if (v === choice.key) fw[k][0]++;
-      }
+  /* ───────── moral profile ───────── */
+  // Each framework scores 1 when it agrees with a choice, 0.5 when divided, 0 when it disagrees.
+  function scoresAfter(k) {
+    const s = { util: 0, kant: 0, virtue: 0 };
+    state.history.slice(0, k).forEach(({ node, choice }) => {
+      FW.forEach((f) => {
+        const v = verdictOf(node.debrief.lenses[f], choice);
+        s[f] += v === "agree" ? 1 : v === "split" ? 0.5 : 0;
+      });
     });
-    const o = obN ? ob / obN : 0.5;
-    const e = state.history.length ? en / state.history.length : 0.5;
-    const hi = (v) => v >= 0.67,
-      lo = (v) => v <= 0.33;
-    let key = "torn";
-    if (hi(o) && hi(e)) key = "instrument";
-    else if (lo(o) && lo(e)) key = "objector";
-    else if (lo(o) && hi(e)) key = "calculator";
-    else if (hi(o) && lo(e)) key = "dutiful";
-    return { key, o, e, obN, fw };
+    FW.forEach((f) => (s[f] /= Math.max(1, k)));
+    return s;
   }
 
-  function meter(left, right, value) {
-    const m = el("div", "meter");
-    const ends = el("div", "ends");
-    ends.append(el("span", null, left), el("span", null, right));
-    const track = el("div", "track");
-    const mark = el("span", "mark");
-    mark.style.left = `${Math.round(value * 100)}%`;
-    track.append(mark);
-    m.append(ends, track);
-    return m;
+  function triangle(profileKey) {
+    const NS = "http://www.w3.org/2000/svg";
+    const C = { util: [220, 70], kant: [50, 364], virtue: [390, 364] };
+    const G = [220, 266];
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const pos = (s) => {
+      const tot = s.util + s.kant + s.virtue;
+      if (!tot) return G.slice();
+      return [0, 1].map((i) => FW.reduce((acc, f) => acc + (s[f] / tot) * C[f][i], 0));
+    };
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 440 430");
+    svg.setAttribute("class", "tri");
+    svg.setAttribute("role", "img");
+    const n = state.history.length;
+    const pts = [G];
+    for (let k = 1; k <= n; k++) pts.push(pos(scoresAfter(k)));
+    const last = pts[pts.length - 1];
+    svg.setAttribute("aria-label", `Ethical profile triangle. Your marker sits closest to ${profileKey === "plural" ? "the center" : S.frameworks[profileKey].name}.`);
+
+    const add = (tag, attrs, parent = svg) => {
+      const e = document.createElementNS(NS, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      parent.append(e);
+      return e;
+    };
+    const P = (arr) => arr.map((p) => p.join(",")).join(" ");
+    // regions around each corner
+    const M = { uk: mid(C.util, C.kant), uv: mid(C.util, C.virtue), kv: mid(C.kant, C.virtue) };
+    const regions = { util: [C.util, M.uk, G, M.uv], kant: [C.kant, M.kv, G, M.uk], virtue: [C.virtue, M.uv, G, M.kv] };
+    FW.forEach((f) => add("polygon", { points: P(regions[f]), class: `region${f === profileKey ? " on" : ""}` }));
+    // inner guide triangles
+    [0.33, 0.66].forEach((t) => add("polygon", { points: P(FW.map((f) => [G[0] + (C[f][0] - G[0]) * t, G[1] + (C[f][1] - G[1]) * t])), class: "grid" }));
+    add("polygon", { points: P(FW.map((f) => C[f])), class: "edge" });
+    add("circle", { cx: G[0], cy: G[1], r: 34, class: `center-mark${profileKey === "plural" ? " on" : ""}` });
+    add("text", { x: G[0], y: G[1] + 50, class: "center-label" }).textContent = "PLURALIST";
+
+    // corners: emblem + name
+    const labels = {
+      util: { x: 220, y: 22, a: "middle" },
+      kant: { x: 22, y: 410, a: "start" },
+      virtue: { x: 418, y: 410, a: "end" }
+    };
+    FW.forEach((f) => {
+      const on = f === profileKey;
+      add("circle", { cx: C[f][0], cy: C[f][1], r: 24, class: `corner-dot${on ? " on" : ""}` });
+      const g = add("g", { transform: `translate(${C[f][0] - 14.4},${C[f][1] - 14.4}) scale(1.2)`, fill: "none", stroke: on ? "#140d04" : "currentColor", "stroke-width": 1.7, "stroke-linecap": "round", "stroke-linejoin": "round", style: on ? "" : "color: var(--ash)" });
+      g.innerHTML = ICONS[f];
+      const L = labels[f];
+      add("text", { x: L.x, y: L.y, "text-anchor": L.a, class: `c-name${on ? " on" : ""}` }).textContent = S.frameworks[f].name;
+      add("text", { x: L.x, y: L.y + 15, "text-anchor": L.a, class: "c-who" }).textContent = S.frameworks[f].who;
+    });
+
+    // your path, decision by decision
+    add("circle", { cx: G[0], cy: G[1], r: 4, class: "start" });
+    add("polyline", { points: P(pts), class: "trail", pathLength: 1 });
+    // numbered waypoints; ones sitting under the final marker are left out
+    const placed = [last];
+    pts.slice(1, -1).forEach((p, i) => {
+      let [x, y] = p;
+      if (Math.hypot(last[0] - x, last[1] - y) < 26) return;
+      while (placed.some((q) => Math.hypot(q[0] - x, q[1] - y) < 22)) y -= 22;
+      placed.push([x, y]);
+      const g = add("g", { class: "wp", style: `animation-delay:${0.4 + (2.2 * (i + 1)) / (pts.length - 1)}s` });
+      add("circle", { cx: x, cy: y, r: 10 }, g);
+      add("text", { x, y }, g).textContent = ROMAN[i + 1];
+    });
+    const me = add("g", { class: "me" });
+    add("circle", { cx: last[0], cy: last[1], r: 14, class: "ring" }, me);
+    add("circle", { cx: last[0], cy: last[1], r: 14, class: "core" }, me);
+    add("text", { x: last[0], y: last[1] + 1, "text-anchor": "middle", "dominant-baseline": "central", style: "font: 600 11px var(--mono); fill: #140d04" }, me).textContent = "YOU";
+    return svg;
   }
 
-  function showDebrief() {
+  function showReport() {
     const e = S.endings[state.ending];
-    const prof = computeProfile();
-    screen("doc", "full");
-    renderer.set("quiet");
+    const n = state.history.length;
+    const s = scoresAfter(n);
+    const tot = s.util + s.kant + s.virtue || 1;
+    const top = FW.reduce((a, b) => (s[b] > s[a] ? b : a));
+    const profileKey = s[top] / tot >= 0.4 ? top : "plural";
+    const prof = S.profiles[profileKey];
+
+    screen("doc");
+    scene("quiet");
+    docInner.className = "doc-inner";
     docInner.replaceChildren();
 
     // header
-    const head = el("header", "doc-head");
-    head.append(
-      el("p", "dispatch", "After-action report · Cpl. Wren, 3rd Rifle Company"),
-      el("h1", null, e.title),
-      el("span", `status ${e.survived ? "live" : "die"}`, e.survived ? "Survived" : "Killed in action"),
-      el("p", "epi", e.epitaph)
-    );
+    const head = el("header", "r-head");
+    const hl = el("div");
+    hl.append(el("p", "dispatch", "After-action report · Cpl. Wren"), el("h1", null, e.title), el("p", "epi", e.epitaph));
+    const luck = el("p", "luck");
+    luck.innerHTML = e.survived
+      ? "<b>Moral luck:</b> you survived, but that doesn’t mean you chose right. In this game, staying alive is never the reward for being good."
+      : "<b>Moral luck:</b> you died, but that doesn’t mean you chose wrong. In this game, staying alive is never the reward for being good.";
+    hl.append(luck);
+    head.append(hl, el("span", `stamp ${e.survived ? "live" : "die"}`, e.survived ? "Survived" : "Killed in action"));
     docInner.append(head);
 
-    // path
-    const pathSec = el("section");
-    pathSec.append(el("p", "label", "Your path through the night"));
-    const path = el("ol", "path");
-    state.history.forEach(({ node, choice }) => {
-      const li = el("li");
-      li.append(el("span", "p-step", `Decision ${ROMAN[node.chapter]}`), el("span", "p-title", node.title), el("span", "p-choice", choice.label));
-      path.append(li);
-    });
-    const endLi = el("li", "p-end");
-    endLi.append(el("span", "p-step", "Outcome"), el("span", "p-title", e.survived ? "Survived" : "Died"), el("span", "p-choice", e.title));
-    path.append(endLi);
-    pathSec.append(path);
-    docInner.append(pathSec);
-
-    // moral luck
-    const last = state.history[state.history.length - 1].choice;
-    const luck = el("section", "luck");
-    luck.append(el("h2", null, "Why you lived or died"));
-    luck.append(
-      el(
-        "p",
-        null,
-        e.survived
-          ? `You survived. That is not the game’s verdict on your character. Your last decision, “${last.label},” is what kept you alive, and it would have kept you alive whether it was right or wrong.`
-          : `You died. That is not the game’s verdict on your character. Your last decision, “${last.label},” is what killed you, and it would have killed you whether it was right or wrong.`
-      ),
-      el(
-        "p",
-        null,
-        "In this game, some of the most defensible choices get you killed and some of the worst get you home, because that is how war works. Philosophers Bernard Williams and Thomas Nagel called this moral luck: what happens after a choice is often out of our control, yet we still judge people by it. Try another path, and ask yourself whether your opinion of a choice changes when its outcome does."
-      )
-    );
-    docInner.append(luck);
-
-    // profile
-    const profSec = el("section", "profile");
-    const pLeft = el("div");
-    const P = S.profiles[prof.key];
-    pLeft.append(el("p", "label", "Your ethical profile"), el("p", "profile-name", P.name), el("p", null, P.text));
-    const pRight = el("div", "meters");
-    const obeyWrap = el("div");
-    obeyWrap.append(el("p", "label", "When given an order"), meter("Followed conscience", "Followed orders", prof.o));
-    const endsWrap = el("div");
-    endsWrap.append(el("p", "label", "When harm could buy a better outcome"), meter("Refused the means", "Accepted the means", prof.e));
-    const fwWrap = el("div", "fws");
-    fwWrap.append(el("p", "label", "Frameworks that agreed with you"));
-    for (const k of ["util", "kant", "virtue"]) {
-      const [a, n] = prof.fw[k];
-      const row = el("div", "fw");
-      const bar = el("div", "bar");
+    // hero: the triangle + profile
+    const hero = el("section", "hero");
+    const profile = el("div", "profile");
+    profile.append(el("p", "you", "Your choices make you"), el("p", "pname", prof.label), el("p", "ptext", prof.text));
+    const bars = el("div", "bars");
+    FW.forEach((f) => {
+      const row = el("div", `bar-row${f === top && profileKey !== "plural" ? " top" : ""}`);
+      const track = el("div", "track");
       const fill = el("i");
-      fill.style.width = n ? `${(a / n) * 100}%` : "0%";
-      bar.append(fill);
-      row.append(el("span", null, LENS_NAMES[k]), bar, el("span", "n", n ? `${a} of ${n}` : "—"));
-      fwWrap.append(row);
-    }
-    pRight.append(obeyWrap, endsWrap, fwWrap);
-    profSec.append(pLeft, pRight);
-    docInner.append(profSec);
+      fill.style.width = `${Math.round(s[f] * 100)}%`;
+      track.append(fill);
+      row.append(html("span", "", svgIcon(f)).firstChild, el("span", "bn", `${S.frameworks[f].short} agreed`), el("span", "pct", `${Math.round(s[f] * 100)}%`), track);
+      bars.append(row);
+    });
+    profile.append(bars);
 
-    // each decision
-    const decSec = el("section");
-    decSec.append(el("h2", null, "Your decisions, through three lenses"));
-    const decWrap = el("div");
-    decWrap.style.display = "grid";
-    decWrap.style.gap = "40px";
+    const orders = state.history.filter((h) => h.choice.tags.obey !== null);
+    if (orders.length) {
+      const ob = orders.filter((h) => h.choice.tags.obey).length;
+      const box = el("div", "orders");
+      box.append(el("p", "label", "Orders vs. conscience"));
+      const row = el("div", "orders-row");
+      const pips = el("div", "pips");
+      orders.forEach((h) => {
+        const p = el("span", `pip ${h.choice.tags.obey ? "obey" : "defy"}`, ROMAN[h.node.chapter]);
+        p.title = `${h.node.title}: ${h.choice.tags.obey ? "obeyed" : "defied"}`;
+        pips.append(p);
+      });
+      row.append(pips, el("span", null, `You obeyed ${ob} of ${orders.length} orders`));
+      box.append(row);
+      profile.append(box);
+    }
+    hero.append(triangle(profileKey), profile);
+    docInner.append(hero);
+
+    // decisions
+    const dsec = el("section");
+    dsec.append(el("p", "label", `Your ${n} decisions · open one to see why`));
+    const grid = el("div", "dcards");
     state.history.forEach(({ node, choice }) => {
       const d = node.debrief;
-      const card = el("article", "decision");
-      const dh = el("div", "decision-head");
-      dh.append(el("p", "dispatch", `Decision ${ROMAN[node.chapter]} · ${node.dispatch.split(" · ")[0]}`), el("h3", null, node.title), el("p", "concept", d.concept));
-      card.append(dh);
-
-      const row = el("div", "picked-row");
-      [choice, ...node.choices.filter((c) => c !== choice)].forEach((c) => {
-          const o = el("div", `opt${c === choice ? " mine" : ""}`);
-          o.append(el("p", "label", c === choice ? "You chose" : "The other option"), el("div", "o-label", c.label), el("div", "o-sub", c.sub));
-          row.append(o);
-        });
-      card.append(row);
-      card.append(el("p", "context", d.context));
-
-      const lenses = el("div", "lenses");
-      for (const k of ["util", "kant", "virtue"]) {
-        const L = d.lenses[k];
-        const box = el("div", "lens");
-        const picks = node.choices.find((c) => c.key === L.verdict);
-        let chip;
-        if (L.verdict === "split") chip = el("span", "chip", "Divided");
-        else if (L.verdict === choice.key) chip = el("span", "chip agree", "Agrees with you");
-        else chip = el("span", "chip disagree", "Disagrees with you");
-        box.append(
-          el("span", "lens-name", LENS_NAMES[k]),
-          el("span", "lens-verdict", picks ? `Leans toward: ${picks.label}` : "Thinkers in this tradition disagree"),
-          chip,
-          el("p", null, L.text)
-        );
-        lenses.append(box);
-      }
-      card.append(lenses);
-
-      const qWrap = el("div");
-      qWrap.append(el("p", "label", "Questions to think with"));
-      const ql = el("ul", "questions");
-      d.questions.forEach((q) => ql.append(el("li", null, q)));
-      qWrap.append(ql);
-      card.append(qWrap);
-      decWrap.append(card);
+      const c = el("article", "dcard");
+      c.append(el("span", "d-top", `${ROMAN[node.chapter]} · ${node.title}`));
+      c.append(html("div", "d-choice", `${svgIcon(choice.icon)}<span></span>`));
+      c.querySelector(".d-choice span").textContent = choice.label;
+      const vs = el("div", "d-verdicts");
+      FW.forEach((f) => {
+        const v = verdictOf(d.lenses[f], choice);
+        const chip = html("span", `chip ${v}`, `${svgIcon(f)}${v === "agree" ? "✓" : v === "disagree" ? "✗" : "~"}`);
+        chip.title = `${S.frameworks[f].short}: ${v === "agree" ? "agrees" : v === "disagree" ? "disagrees" : "divided"}`;
+        vs.append(chip);
+      });
+      c.append(vs);
+      const det = el("details");
+      det.append(el("summary", null, "Why"));
+      const why = el("div", "why");
+      FW.forEach((f) => {
+        const p = el("p");
+        p.append(el("span", "lens-k", S.frameworks[f].short), document.createTextNode(d.lenses[f].text));
+        why.append(p);
+      });
+      why.append(el("p", "q", d.question), el("p", "ctx", d.context));
+      det.append(why);
+      c.append(det);
+      grid.append(c);
     });
-    decSec.append(decWrap);
-    docInner.append(decSec);
+    dsec.append(grid);
+    docInner.append(dsec);
 
-    // endings found
+    // footer
     const got = found.get();
-    const endSec = el("section");
-    endSec.append(el("h2", null, `Endings found: ${ENDING_ORDER.filter((id) => got.includes(id)).length} of ${ENDING_ORDER.length}`));
-    const endList = el("ul", "endings");
-    ENDING_ORDER.forEach((id) => {
-      const en = S.endings[id];
-      const has = got.includes(id);
-      const li = el("li", has ? `found ${en.survived ? "live" : "die"}` : "");
-      li.append(el("span", "e-name", has ? en.title : "Undiscovered"), el("span", "e-state", has ? (en.survived ? "Survived" : "Died") : "???"));
-      endList.append(li);
+    const foot = el("footer", "foot");
+    const tokens = el("div", "tokens");
+    tokens.append(el("span", "label", `Endings found ${ENDING_ORDER.filter((x) => got.includes(x)).length} of ${ENDING_ORDER.length}`));
+    ENDING_ORDER.forEach((x) => {
+      const has = got.includes(x);
+      const t = el("span", `token${has ? (S.endings[x].survived ? " live" : " die") : ""}`);
+      t.title = has ? S.endings[x].title : "Undiscovered";
+      tokens.append(t);
     });
-    endSec.append(endList);
-    docInner.append(endSec);
-
     const actions = el("div", "doc-actions");
     const again = el("button", "btn primary", "Play again");
     again.type = "button";
     again.addEventListener("click", () => {
-      A.click();
-      restart();
+      if (A) A.click();
+      start(false);
     });
     const notes = el("button", "btn", "Designer’s Notes");
     notes.type = "button";
     notes.addEventListener("click", () => {
-      A.click();
-      showNotes("debrief");
+      if (A) A.click();
+      showNotes("report");
     });
     actions.append(again, notes);
-    docInner.append(actions);
+    foot.append(tokens, actions);
+    docInner.append(foot);
     doc.scrollTop = 0;
   }
 
   /* ───────── designer's notes ───────── */
   function showNotes(from) {
-    returnTo = from;
-    screen("doc", "full");
-    renderer.set("quiet");
+    runId++;
+    screen("doc");
+    scene("quiet");
+    docInner.className = "doc-inner notes-page";
     docInner.replaceChildren();
-    const head = el("header", "doc-head");
+    const head = el("header");
     head.append(el("p", "dispatch", "Philosophy project · Designer’s notes"), el("h1", null, "Designer’s Notes"));
     const art = el("article", "notes");
     art.innerHTML = S.notes;
     const actions = el("div", "doc-actions");
-    const back = el("button", "btn primary", from === "debrief" ? "Back to the report" : "Back to the title");
+    const back = el("button", "btn primary", from === "report" ? "Back to your profile" : "Back to the title");
     back.type = "button";
     back.addEventListener("click", () => {
-      A.click();
-      if (returnTo === "debrief" && state.ending) showDebrief();
+      if (A) A.click();
+      if (from === "report" && state.ending) showReport();
       else showTitle();
     });
     actions.append(back);
-    if (from !== "debrief") {
-      const play = el("button", "btn", "Begin");
-      play.type = "button";
-      play.addEventListener("click", begin);
-      actions.append(play);
-    }
     docInner.append(head, art, actions);
     doc.scrollTop = 0;
   }
 
-  /* ───────── start / restart ───────── */
-  function begin() {
-    A.init();
-    A.setMuted(muted);
-    A.setMood((window.SCENES.intro || {}).audio || {});
-    A.click();
-    state.history = [];
-    state.ending = null;
-    inner.replaceChildren();
-    showIntro(0);
+  /* ───────── title / start ───────── */
+  function showTitle() {
+    runId++;
+    screen("title");
+    scene("title");
+    const n = found.get().length;
+    $("#found").textContent = n ? `Endings found: ${n} of ${ENDING_ORDER.length}` : `${ENDING_ORDER.length} endings to find.`;
   }
-  function restart() {
+
+  async function start(withOpening) {
+    if (A) {
+      A.init();
+      A.setMuted(muted);
+      A.click();
+    }
+    const id = ++runId;
     state.history = [];
     state.ending = null;
-    inner.replaceChildren();
-    showNode(S.start);
+    state.visited = ["veyra"];
+    screen("play");
+    if (withOpening && !(await opening(id))) return;
+    if (!withOpening) {
+      state.km = 40;
+      hudTime("21:40");
+    }
+    if (!(await travel("veyra", S.start, id))) return;
+    playNode(S.start, id);
   }
 
   /* ───────── input ───────── */
-  panel.addEventListener("click", (e) => {
-    if (typing && !e.target.closest("button")) typing.finish();
+  document.addEventListener("click", (e) => {
+    if (body.dataset.screen !== "play") return;
+    if (e.target.closest("button, #hud, .choices")) return;
+    advance();
   });
+  const held = {};
   document.addEventListener("keydown", (e) => {
-    if (e.target.closest && e.target.closest("button") && (e.key === "Enter" || e.key === " ")) return;
-    if (typing && (e.key === " " || e.key === "Enter")) {
-      e.preventDefault();
-      typing.finish();
+    if (body.dataset.screen !== "play") return;
+    const onChoice = e.target.closest && e.target.closest(".choice");
+    if (holdHandles && (e.key === "1" || e.key === "2")) {
+      if (!e.repeat) {
+        const h = holdHandles[Number(e.key) - 1];
+        if (h) {
+          held[e.key] = h;
+          h.down();
+        }
+      }
       return;
     }
-    if (keyChoices && (e.key === "1" || e.key === "2")) {
-      const b = keyChoices[Number(e.key) - 1];
-      if (b && !b.disabled) b.click();
+    if (onChoice && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      if (!e.repeat && onChoice._hold) {
+        held[e.key] = onChoice._hold;
+        onChoice._hold.down();
+      }
+      return;
+    }
+    if (e.target.closest && e.target.closest("button")) return;
+    if (e.key === " " || e.key === "Enter" || e.key === "ArrowRight") {
+      e.preventDefault();
+      advance();
+    }
+  });
+  document.addEventListener("keyup", (e) => {
+    if (held[e.key]) {
+      held[e.key].up();
+      delete held[e.key];
     }
   });
 
@@ -612,15 +781,17 @@
     try {
       localStorage.setItem("lastOrders.muted", muted ? "1" : "0");
     } catch (e) {}
-    A.init();
-    A.setMuted(muted);
-    A.setMood(renderer.def.audio || {});
+    if (A) {
+      A.init();
+      A.setMuted(muted);
+      A.setMood(renderer.def.audio || {});
+    }
     paintSound();
   });
 
-  $("#begin").addEventListener("click", begin);
+  $("#begin").addEventListener("click", () => start(true));
   $("#notesBtn").addEventListener("click", () => {
-    A.click();
+    if (A) A.click();
     showNotes("title");
   });
 

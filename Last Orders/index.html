@@ -9,15 +9,21 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800;900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-screen="title" data-mode="full">
+<body data-screen="title">
   <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="lb lb-top" aria-hidden="true"></div>
+  <div class="lb lb-bot" aria-hidden="true"></div>
 
   <header id="hud">
-    <span class="brand">Last Orders</span>
-    <ol id="pips" aria-label="Decisions">
-      <li>I</li><li>II</li><li>III</li><li>IV</li>
-    </ol>
-    <button id="sound" type="button" aria-pressed="true">Sound on</button>
+    <div class="hud-obj">
+      <span class="k">Objective</span>
+      <span class="v">Reach Saltmarsh Harbor by 06:00</span>
+    </div>
+    <div class="hud-stats">
+      <span class="stat"><span class="k">Time</span><span id="clock" class="n">21:40</span></span>
+      <span class="stat"><span class="k">Harbor</span><span id="km" class="n">40 km</span></span>
+      <button id="sound" type="button" aria-pressed="true">Sound on</button>
+    </div>
   </header>
 
   <section id="title" class="title" aria-labelledby="logo">
@@ -25,16 +31,32 @@
     <h1 class="logo" id="logo">Last<br><span>Orders</span></h1>
     <p class="tagline">One night. Four decisions. The last ship leaves at dawn.</p>
     <div class="actions">
-      <button class="btn primary" id="begin" type="button">Begin</button>
+      <button class="btn primary" id="begin" type="button">Play</button>
       <button class="btn" id="notesBtn" type="button">Designer’s Notes</button>
     </div>
-    <p class="meta">An interactive ethics game about obedience, conscience, and whether the ends justify the means. About 5 minutes. Best with sound.</p>
+    <p class="meta">An ethics game about obedience, conscience, and whether the ends justify the means. About 6 minutes. Sound on.</p>
     <p class="meta" id="found"></p>
   </section>
 
-  <aside id="panel" class="panel" hidden>
-    <div id="panelInner" class="panel-inner"></div>
-  </aside>
+  <div id="card" class="card" hidden></div>
+
+  <div id="prompt" class="prompt" hidden>
+    <p id="promptK" class="prompt-k"></p>
+    <h2 id="promptQ" class="prompt-q"></h2>
+    <p id="promptSub" class="prompt-sub"></p>
+    <div class="timer"><i id="timerBar"></i></div>
+  </div>
+
+  <div id="react" class="react" hidden></div>
+
+  <div id="caption" class="caption" hidden>
+    <p id="who" class="who"></p>
+    <p id="line" class="line"></p>
+    <span class="next" aria-hidden="true"></span>
+  </div>
+
+  <div id="choices" class="choices" hidden></div>
+  <p id="toast" class="toast" role="status" hidden></p>
 
   <section id="ending" class="ending" hidden></section>
 

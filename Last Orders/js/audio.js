@@ -213,17 +213,96 @@
       o.stop(t + 0.3);
     },
 
-    heartbeat(on) {
-      clearInterval(this.heartTimer);
+    // Heartbeat. rate 1 = resting, higher = faster
+    heartbeat(on, rate = 1) {
+      clearTimeout(this.heartTimer);
       this.heartTimer = null;
+      this.heartRate = rate;
       if (!on || !this.ctx) return;
       const beat = () => {
         const t = this.ctx.currentTime + 0.02;
         this.thump(t, 0.55);
         this.thump(t + 0.24, 0.35);
+        this.heartTimer = setTimeout(beat, 1050 / this.heartRate);
       };
       beat();
-      this.heartTimer = setInterval(beat, 1050);
+    },
+    setHeartRate(rate) {
+      this.heartRate = rate;
+    },
+
+    // Rising tone while a choice is held down
+    holdStart(ms) {
+      if (!this.ctx) return;
+      this.holdStop();
+      const t = this.ctx.currentTime;
+      const o = this.ctx.createOscillator();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(70, t);
+      o.frequency.exponentialRampToValueAtTime(220, t + ms / 1000);
+      const f = this.ctx.createBiquadFilter();
+      f.type = "lowpass";
+      f.frequency.setValueAtTime(300, t);
+      f.frequency.linearRampToValueAtTime(1400, t + ms / 1000);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.12, t + 0.15);
+      o.connect(f).connect(g).connect(this.master);
+      o.start(t);
+      this.holdNode = { o, g };
+    },
+    holdStop() {
+      if (!this.holdNode || !this.ctx) return;
+      const { o, g } = this.holdNode;
+      const t = this.ctx.currentTime;
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(g.gain.value, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      o.stop(t + 0.15);
+      this.holdNode = null;
+    },
+    // The weight of a decision landing
+    commit() {
+      if (!this.ctx) return;
+      this.holdStop();
+      const t = this.ctx.currentTime + 0.01;
+      this.thump(t, 0.9);
+      this.boom(0.2, 0.5);
+    },
+    // Map marker arriving
+    blip() {
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      [880, 1320].forEach((fr, i) => {
+        const o = this.ctx.createOscillator();
+        o.type = "sine";
+        o.frequency.value = fr;
+        const g = this.ctx.createGain();
+        const st = t + i * 0.09;
+        g.gain.setValueAtTime(0.0001, st);
+        g.gain.exponentialRampToValueAtTime(0.12, st + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, st + 0.18);
+        o.connect(g).connect(this.master);
+        o.start(st);
+        o.stop(st + 0.2);
+      });
+    },
+    // Incoming shell
+    whistle() {
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      const o = this.ctx.createOscillator();
+      o.type = "sine";
+      o.frequency.setValueAtTime(1500, t);
+      o.frequency.exponentialRampToValueAtTime(380, t + 1.5);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.14, t + 0.3);
+      g.gain.setValueAtTime(0.14, t + 1.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.52);
+      o.connect(g).connect(this.master);
+      o.start(t);
+      o.stop(t + 1.6);
     },
 
     sting(kind) {

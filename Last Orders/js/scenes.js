@@ -372,7 +372,9 @@
         ctx.quadraticCurveTo(-200, 350, 250, 372);
         ctx.lineTo(262, 400);
         ctx.fill();
-        const blown = S.opts.variant === "blown";
+        const v = S.opts.variant || "";
+        const blown = v.startsWith("blown");
+        const crossing = v === "crossing";
         const adv = blown ? 0.55 : Math.min(1, S.st / 70);
         for (let i = 0; i < 4; i++) {
           const tx = 20 + i * 52 + adv * 50;
@@ -398,7 +400,7 @@
         ctx.fillStyle = INK;
         ctx.strokeStyle = INK;
         ctx.lineWidth = 3;
-        const span = (a, b) => {
+        const truss = (a, b) => {
           ctx.fillRect(a, deckY, b - a, 9);
           for (let x = a; x < b; x += 30) {
             line(ctx, x, deckY, x + 15, deckY - 30);
@@ -406,24 +408,47 @@
           }
           ctx.fillRect(a, deckY - 32, b - a, 4);
         };
-        span(250, 430);
-        if (!blown) span(430, 610);
-        span(610, 790);
+        truss(250, 430);
+        truss(610, 790);
         [250, 430, 610, 790].forEach((x) => ctx.fillRect(x - 6, deckY, 12, 240));
         if (blown) {
+          // the middle span drops into the river
+          const fp = ease(clamp(S.st / 1.5, 0, 1));
+          ctx.save();
+          ctx.globalAlpha = 1 - fp * 0.7;
+          ctx.translate(520, deckY + fp * 160);
+          ctx.rotate(fp * 0.35);
+          ctx.fillRect(-90, 0, 180, 9);
+          for (let x = -90; x < 90; x += 30) {
+            line(ctx, x, 0, x + 15, -30);
+            line(ctx, x + 15, -30, x + 30, 0);
+          }
+          if (v === "blowntank") tank(ctx, -10, 0, 0.36, INK);
+          ctx.restore();
+          ctx.globalAlpha = 1;
           ctx.save();
           ctx.translate(430, deckY);
-          ctx.rotate(0.55);
-          ctx.fillRect(0, 0, 80, 8);
+          ctx.rotate(0.55 * fp);
+          ctx.fillRect(0, 0, 50, 8);
           ctx.restore();
           ctx.save();
           ctx.translate(610, deckY);
-          ctx.rotate(Math.PI - 0.65);
-          ctx.fillRect(0, -8, 70, 8);
+          ctx.rotate(Math.PI - 0.65 * fp);
+          ctx.fillRect(0, -8, 45, 8);
           ctx.restore();
           fire(ctx, 460, 425, 16, t, 21);
           fire(ctx, 585, 420, 12, t, 22);
+          if (S.st < 3) {
+            ctx.globalAlpha = 0.6 * (1 - S.st / 3);
+            glow(ctx, 520, 430, 140, "rgba(230,215,200,A)", 0.5);
+            ctx.globalAlpha = 1;
+          }
+        } else if (crossing) {
+          truss(430, 610);
+          // the lead tank rolls onto the bridge
+          tank(ctx, 240 + Math.min(S.st * 18, 230), deckY, 0.36, INK);
         } else {
+          truss(430, 610);
           // refugees crossing toward you
           const R = rng(99);
           for (let i = 0; i < 16; i++) {
@@ -452,7 +477,12 @@
         ctx.quadraticCurveTo(760, 500, 700, 380);
         ctx.stroke();
         // Harrow with the radio, behind you
-        person(ctx, 930, 452, 104, { helmet: true, rifle: "sling", facing: -1 });
+        if (v !== "blowntank") person(ctx, 930, 452, 104, { helmet: true, rifle: "sling", facing: -1 });
+        // after waiting, the refugees are safe on your bank
+        if (crossing || v === "blowntank") {
+          const R = rng(55);
+          for (let i = 0; i < 12; i++) person(ctx, 775 + R() * 60, 460 + R() * 4, 24 + R() * 8, { facing: -1, bulky: R() > 0.6, color: "#0b0909" });
+        }
       }
     },
 
@@ -494,7 +524,7 @@
         ctx.lineTo(790, 432);
         ctx.fill();
         // window with lantern
-        const fl = 0.8 + 0.2 * Math.sin(t * 9) * Math.sin(t * 3.1);
+        const fl = (0.8 + 0.2 * Math.sin(t * 9) * Math.sin(t * 3.1)) * (S.opts.variant === "dark" ? 0.3 : 1);
         glow(ctx, 450, 420, 140 * fl, "rgba(255,170,80,A)", 0.3);
         ctx.fillStyle = `rgba(255,${170 + fl * 20},90,${0.9 * fl})`;
         ctx.fillRect(420, 395, 60, 52);
@@ -547,8 +577,9 @@
         // boots passing over the gaps: a dark shape sweeping left->right
         const bootX = ((S.st * 70) % 1500) - 250;
         gaps.forEach((gx, i) => {
-          const occl = Math.abs(bootX - gx) < 40 || Math.abs(bootX - 60 - gx) < 30;
-          const a = occl ? 0.02 : 0.16 + 0.05 * Math.sin(t * 2 + i);
+          const passed = S.opts.variant === "passed";
+          const occl = !passed && (Math.abs(bootX - gx) < 40 || Math.abs(bootX - 60 - gx) < 30);
+          const a = (occl ? 0.02 : 0.16 + 0.05 * Math.sin(t * 2 + i)) * (passed ? 0.35 : 1);
           // flashlight beams through the cracks
           const g = ctx.createLinearGradient(0, 90, 0, 560);
           g.addColorStop(0, `rgba(200,215,235,${a * 2})`);
@@ -720,6 +751,7 @@
         ctx.fillRect(100, 450, 800, 150);
         // kneeling prisoners
         for (let i = 0; i < 10; i++) {
+          if (i === 5 && S.opts.variant === "shot" && S.st > 0.15) continue;
           const x = 250 + i * 52;
           person(ctx, x, 540, 72, { pose: "kneel", arms: "behind", facing: -1, helmet: i % 3 === 0, lean: 0.12 - (i === 4 ? 0.06 : 0) });
         }
@@ -1026,6 +1058,269 @@
   };
   SCENES.intro = SCENES.title;
 
+  // Tactical map shown between chapters
+  const FRONT = [60, 200, 330, 520, 690];
+  const ROADS = [["veyra", "bridge"], ["bridge", "prisoner"], ["bridge", "cellar"], ["prisoner", "checkpoint"], ["prisoner", "captured"], ["cellar", "checkpoint"], ["cellar", "captured"], ["checkpoint", "signal"], ["checkpoint", "boat"], ["captured", "signal"], ["signal", "boat"]];
+  const COAST = [[905, -600], [900, 0], [870, 80], [838, 150], [852, 220], [880, 280], [858, 332], [882, 400], [905, 480], [885, 600], [900, 1200]];
+  SCENES.map = {
+    sky: ["#0b1210", "#0b1210", "#0b1210"],
+    horizon: 1,
+    static: true,
+    weather: null,
+    flashes: 0,
+    pfocus: (o) => {
+      const P = window.STORY.places;
+      return P[o.from] && P[o.to] ? clamp((P[o.from].x + P[o.to].x) / 2, 320, 680) : 500;
+    },
+    audio: { wind: 0.1, rumble: 0.2, drone: 0.05 },
+    draw(ctx, t, S) {
+      const P = window.STORY.places;
+      const o = S.opts;
+      const mono = (px) => `${px}px "IBM Plex Mono", ui-monospace, monospace`;
+      ctx.fillStyle = "#0b1210";
+      ctx.fillRect(-2000, -800, 5000, 2200);
+      // grid with map references
+      ctx.strokeStyle = "rgba(140,180,150,0.07)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = -1000; x <= 2000; x += 50) {
+        ctx.moveTo(x, -800);
+        ctx.lineTo(x, 1400);
+      }
+      for (let y = -800; y <= 1400; y += 50) {
+        ctx.moveTo(-1000, y);
+        ctx.lineTo(2000, y);
+      }
+      ctx.stroke();
+      ctx.fillStyle = "rgba(160,190,170,0.3)";
+      ctx.font = mono(9);
+      for (let i = 0; i < 20; i++) ctx.fillText(String.fromCharCode(65 + i), i * 50 + 22, 16);
+      for (let j = 1; j < 12; j++) ctx.fillText(String(j).padStart(2, "0"), 4, j * 50 + 4);
+      // sea
+      const coastPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(COAST[0][0], COAST[0][1]);
+        COAST.forEach((c) => ctx.lineTo(c[0], c[1]));
+      };
+      coastPath();
+      ctx.lineTo(2600, 1200);
+      ctx.lineTo(2600, -600);
+      ctx.closePath();
+      ctx.fillStyle = "rgba(40,75,95,0.35)";
+      ctx.fill();
+      ctx.save();
+      ctx.clip();
+      ctx.strokeStyle = "rgba(120,170,200,0.13)";
+      ctx.beginPath();
+      for (let y = -600; y < 1200; y += 8) {
+        ctx.moveTo(800, y);
+        ctx.lineTo(2600, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+      ctx.strokeStyle = "rgba(190,215,200,0.6)";
+      ctx.lineWidth = 1.6;
+      coastPath();
+      ctx.stroke();
+      ctx.fillStyle = "rgba(150,190,210,0.55)";
+      ctx.font = "italic 13px Georgia, serif";
+      ctx.fillText("Gulf of Lorn", 925, 470);
+      // river Kessel
+      ctx.strokeStyle = "rgba(90,150,185,0.7)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(300, -600);
+      ctx.bezierCurveTo(240, 100, 300, 250, 262, 300);
+      ctx.bezierCurveTo(230, 350, 285, 480, 235, 1200);
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(276, 480);
+      ctx.rotate(1.45);
+      ctx.fillText("Kessel River", 0, 0);
+      ctx.restore();
+      // Tannen forest
+      const trees = S.cached("m-forest", () => {
+        const R = rng(8);
+        const a = [];
+        for (let i = 0; i < 170; i++) {
+          const ang = R() * TAU,
+            r = Math.sqrt(R());
+          a.push([565 + Math.cos(ang) * r * 115, 170 + Math.sin(ang) * r * 72]);
+        }
+        return a;
+      });
+      ctx.fillStyle = "rgba(120,165,120,0.26)";
+      trees.forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.arc(x, y, 3.2, 0, TAU);
+        ctx.fill();
+      });
+      ctx.fillStyle = "rgba(140,180,140,0.5)";
+      ctx.fillText("Tannen Forest", 520, 262);
+      // roads
+      ctx.strokeStyle = "rgba(210,215,195,0.16)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([2, 6]);
+      ctx.beginPath();
+      ROADS.forEach(([a, b]) => {
+        ctx.moveTo(P[a].x, P[a].y);
+        ctx.lineTo(P[b].x, P[b].y);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // the enemy front advances
+      const fp = ease(clamp((S.st - 0.3) / 1.8, 0, 1));
+      const fx = lerp(FRONT[o.fromCh || 0], FRONT[o.toCh || 0], fp);
+      const edge = () => {
+        for (let y = -800; y <= 1400; y += 40) ctx.lineTo(fx + Math.sin(y * 0.02 + 1) * 18, y);
+      };
+      ctx.beginPath();
+      ctx.moveTo(-2000, -800);
+      edge();
+      ctx.lineTo(-2000, 1400);
+      ctx.closePath();
+      ctx.fillStyle = "rgba(200,60,40,0.1)";
+      ctx.fill();
+      ctx.save();
+      ctx.clip();
+      ctx.strokeStyle = "rgba(220,80,60,0.15)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = -2600; x < 1400; x += 14) {
+        ctx.moveTo(x, -800);
+        ctx.lineTo(x + 1100, 1400);
+      }
+      ctx.stroke();
+      ctx.restore();
+      ctx.strokeStyle = "rgba(235,95,65,0.7)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([7, 5]);
+      ctx.beginPath();
+      ctx.moveTo(fx + Math.sin(-800 * 0.02 + 1) * 18, -800);
+      edge();
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(240,110,80,0.85)";
+      ctx.font = mono(10);
+      ctx.fillText("ENEMY ADVANCE \u25B6", fx - 128, 575);
+      // Veyra burns
+      ctx.globalCompositeOperation = "lighter";
+      glow(ctx, P.veyra.x, P.veyra.y, 70, "rgba(255,110,40,A)", 0.45 + 0.15 * Math.sin(t * 3));
+      ctx.globalCompositeOperation = "source-over";
+      // the route you've taken
+      const visited = o.visited || [];
+      ctx.strokeStyle = "rgba(233,162,59,0.85)";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      visited.forEach((id, i) => (i ? ctx.lineTo(P[id].x, P[id].y) : ctx.moveTo(P[id].x, P[id].y)));
+      ctx.stroke();
+      // places
+      for (const id in P) {
+        const q = P[id];
+        const seen = visited.includes(id);
+        const target = id === o.to;
+        ctx.strokeStyle = seen ? "rgba(233,162,59,0.95)" : "rgba(200,205,190,0.5)";
+        ctx.fillStyle = seen ? "rgba(233,162,59,0.95)" : "rgba(11,18,16,1)";
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(q.x - 4, q.y - 4, 8, 8);
+        ctx.strokeRect(q.x - 4, q.y - 4, 8, 8);
+        ctx.fillStyle = seen || target ? "rgba(238,232,218,0.95)" : "rgba(200,205,190,0.42)";
+        ctx.font = mono(target ? 12 : 10);
+        const left = q.x > 780;
+        ctx.textAlign = left ? "right" : "left";
+        ctx.fillText(q.name, q.x + (left ? -10 : 10), q.y - 9);
+        ctx.textAlign = "left";
+      }
+      // destination
+      const H = P.boat;
+      ctx.strokeStyle = "rgba(233,162,59,0.8)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(H.x, H.y, 13 + Math.sin(t * 2) * 1.5, 0, TAU);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(233,162,59,0.9)";
+      ctx.font = mono(9);
+      ctx.textAlign = "right";
+      ctx.fillText("LAST SHIP 06:00", H.x - 10, H.y + 22);
+      ctx.textAlign = "left";
+      // current leg, drawn as you travel
+      const A0 = P[o.from],
+        B0 = P[o.to];
+      if (A0 && B0) {
+        const q = ease(clamp((S.st - 0.6) / 1.7, 0, 1));
+        const mx = lerp(A0.x, B0.x, q),
+          my = lerp(A0.y, B0.y, q);
+        ctx.strokeStyle = "rgba(233,162,59,0.95)";
+        ctx.lineWidth = 2.4;
+        ctx.setLineDash([8, 6]);
+        ctx.lineDashOffset = -t * 30;
+        ctx.beginPath();
+        ctx.moveTo(A0.x, A0.y);
+        ctx.lineTo(mx, my);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        const pr = (t * 1.1) % 1;
+        ctx.strokeStyle = `rgba(233,162,59,${1 - pr})`;
+        ctx.beginPath();
+        ctx.arc(mx, my, 7 + pr * 26, 0, TAU);
+        ctx.stroke();
+        ctx.fillStyle = "#f1b04c";
+        ctx.beginPath();
+        ctx.arc(mx, my, 6, 0, TAU);
+        ctx.fill();
+        if (q >= 1 && !S.local.blip) {
+          S.local.blip = true;
+          if (window.AudioFX) AudioFX.blip();
+        }
+      }
+    }
+  };
+
+  // Night firefight in the Tannen forest
+  SCENES.forest = {
+    sky: ["#030406", "#070a0e", "#0f161b"],
+    horizon: 0.76,
+    weather: "drizzle",
+    flashes: 0,
+    focal: { x: 500, y: 460 },
+    audio: { wind: 0.3, rumble: 0.2, rain: 0.2, drone: 0.1 },
+    draw(ctx, t, S) {
+      const back = S.cached("fo-back", () => Array.from({ length: 16 }, (_, i) => makeTree(100 + i, -400 + i * 110 + (i % 3) * 25, 470, 60 + ((i * 37) % 40))));
+      back.forEach((tr) => drawTree(ctx, tr, "#10171c", Math.sin(t) * 1.5));
+      ctx.fillStyle = "rgba(70,85,100,0.16)";
+      ctx.fillRect(-2000, 410, 5000, 70);
+      const L = S.local;
+      L.mf = L.mf || [];
+      if (!REDUCED && Math.random() < 4 * S.dt) {
+        L.mf.push({ x: 60 + Math.random() * 880, y: 420 + Math.random() * 70, life: 0 });
+        if (window.AudioFX && Math.random() < 0.5) AudioFX.shots(1);
+      }
+      ctx.globalCompositeOperation = "lighter";
+      L.mf.forEach((f) => {
+        f.life += S.dt;
+        glow(ctx, f.x, f.y, 34, "rgba(255,225,160,A)", Math.max(0, 1 - f.life / 0.14));
+      });
+      ctx.globalCompositeOperation = "source-over";
+      L.mf = L.mf.filter((f) => f.life < 0.14);
+      const front = S.cached("fo-front", () => Array.from({ length: 8 }, (_, i) => makeTree(300 + i, -300 + i * 200, 560, 110 + ((i * 53) % 50))));
+      front.forEach((tr) => drawTree(ctx, tr, INK, Math.sin(t * 1.2) * 2));
+      ctx.fillStyle = INK;
+      ctx.fillRect(-2000, 540, 5000, 120);
+      person(ctx, 380, 545, 84, { pose: "kneel", helmet: true, rifle: true, facing: 1 });
+      person(ctx, 540, 548, 92, { helmet: true, rifle: "shoulder", facing: 1 });
+    }
+  };
+
+  // Camera focal points, portrait framing and blast positions per scene
+  Object.assign(SCENES.title, { focal: { x: 620, y: 440 } });
+  Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 560, blast: [520, 372] });
+  Object.assign(SCENES.farmhouse, { focal: { x: 450, y: 420 } });
+  Object.assign(SCENES.cellar, { focal: { x: 460, y: 470 } });
+  Object.assign(SCENES.checkpoint, { focal: { x: 500, y: 460 } });
+  Object.assign(SCENES.camp, { focal: { x: 500, y: 480 } });
+  Object.assign(SCENES.harbor, { focal: { x: 450, y: 420 }, barrageZone: [-250, 350, 440] });
+  Object.assign(SCENES.lighthouse, { focal: { x: 700, y: 260 }, pfocus: 620, barrageZone: [60, 380, 330] });
+
   function tank(ctx, x, y, s, color) {
     ctx.save();
     ctx.translate(x, y);
@@ -1076,7 +1371,10 @@
       this.cache = {};
       this.shakeAmt = 0;
       this.last = performance.now();
-      this.onFlash = null;
+      this.cam = { z: 1, x: 500, y: 380 };
+      this.pushed = false;
+      this.white = 0;
+      this.local = {};
       this.grain = this.makeGrain();
       this.resize();
       window.addEventListener("resize", () => this.resize());
@@ -1106,8 +1404,10 @@
       this.canvas.height = Math.round(this.h * dpr);
       const L = this.layoutFn ? this.layoutFn(this.w, this.h) : { cx: this.w / 2, bottom: this.h * 0.9, availW: this.w };
       this.L = L;
-      this.scale = Math.min(L.availW / 760, (L.bottom - (L.top || 0)) / 620);
-      this.ox = L.cx - 500 * this.scale;
+      this.scale = Math.min(L.availW / (L.portrait ? 640 : 760), (L.bottom - (L.top || 0)) / 620);
+      const pf = this.def.pfocus;
+      const fx = L.portrait && pf ? (typeof pf === "function" ? pf(this.opts) : pf) : 500;
+      this.ox = L.cx - fx * this.scale;
       this.oy = L.bottom - 600 * this.scale;
     }
 
@@ -1119,6 +1419,7 @@
         // variant change on same scene: no fade, keep time
         this.opts = opts;
         this.st = 0;
+        this.local = {};
         return;
       }
       this.pending = { name, def, opts };
@@ -1136,6 +1437,11 @@
       this.particles = [];
       this.flashes = [];
       this.coverTarget = 0;
+      this.local = {};
+      this.pushed = false;
+      const f = this.def.focal || { x: 500, y: 380 };
+      this.cam = { z: 1, x: f.x, y: f.y };
+      this.resize();
       if (window.AudioFX) AudioFX.setMood(this.def.audio || {});
     }
 
@@ -1164,11 +1470,53 @@
     }
 
     barrage() {
+      const z = this.def.barrageZone || [60, 380, 330];
       for (let i = 0; i < 6; i++)
         setTimeout(() => {
-          this.flashes.push({ x: 60 + Math.random() * 320, y: 330, life: 0, max: 1.2, big: 1.4 });
-          if (window.AudioFX) AudioFX.boom(0.6, 1);
+          this.flashes.push({ x: z[0] + Math.random() * (z[1] - z[0]), y: z[2], life: 0, max: 1.2, big: 1.4 });
+          this.shakeAmt = Math.max(this.shakeAmt, 5);
+          if (window.AudioFX) AudioFX.boom(0.5, 1);
         }, i * 380);
+    }
+
+    push(on) {
+      this.pushed = on;
+    }
+
+    whiteout(a) {
+      if (!REDUCED) this.white = Math.max(this.white, a);
+    }
+
+    // Named effects used by the story's beats
+    fx(name) {
+      const A = window.AudioFX;
+      const d = this.def;
+      if (name === "explosion") {
+        const [x, y] = d.blast || [500, 400];
+        this.explode(x, y, 1.2);
+        this.whiteout(0.75);
+      } else if (name === "shots") this.muzzle();
+      else if (name === "shot") {
+        this.flashes.push({ x: 520, y: 480, life: 0, max: 0.25, big: 0.5, near: true });
+        this.whiteout(0.3);
+        this.shakeAmt = 6;
+        if (A) A.shots(1);
+      } else if (name === "volley") {
+        this.muzzle();
+        setTimeout(() => this.muzzle(), 260);
+        setTimeout(() => this.whiteout(0.4), 200);
+      } else if (name === "barrage") this.barrage();
+      else if (name === "boom") {
+        this.flashes.push({ x: 250 + Math.random() * 500, y: 600 * (d.horizon || 0.7) - 20, life: 0, max: 1.3, big: 1.8 });
+        this.shakeAmt = 7;
+        if (A) A.boom(0.35, 1.1);
+      } else if (name === "incoming") {
+        if (A) A.whistle();
+        setTimeout(() => {
+          this.explode(790, 170, 1.8);
+          this.whiteout(1);
+        }, 1500);
+      }
     }
 
     frame(ts) {
@@ -1189,8 +1537,19 @@
       const { ctx, w, h, dpr, def } = this;
       const t = REDUCED ? this.t * 0.25 : this.t;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // camera: a slow push-in, and a tighter push when a decision is due
+      const cam = this.cam;
+      const foc = def.focal || { x: 500, y: 380 };
+      const tz = def.static || REDUCED ? 1 : this.pushed ? 1.14 : 1 + Math.min(this.st / 40, 1) * 0.05;
+      const rate = Math.min(1, dt * (this.pushed ? 1.4 : 0.7));
+      cam.z += (tz - cam.z) * rate;
+      cam.x += (foc.x - cam.x) * rate;
+      cam.y += (foc.y - cam.y) * rate;
+      const zs = this.scale * cam.z;
+      const offX = this.ox + cam.x * this.scale * (1 - cam.z);
+      const offY = this.oy + cam.y * this.scale * (1 - cam.z);
       // sky
-      const hy = this.oy + 600 * this.scale * (def.horizon || 0.7);
+      const hy = offY + 600 * zs * (def.horizon || 0.7);
       const sky = ctx.createLinearGradient(0, 0, 0, Math.max(hy, 1));
       sky.addColorStop(0, def.sky[0]);
       sky.addColorStop(0.55, def.sky[1]);
@@ -1208,8 +1567,8 @@
         sy = (Math.random() - 0.5) * this.shakeAmt;
         this.shakeAmt *= Math.pow(0.02, dt);
       }
-      const k = this.scale * dpr;
-      ctx.setTransform(k, 0, 0, k, (this.ox + sx) * dpr, (this.oy + sy) * dpr);
+      const k = zs * dpr;
+      ctx.setTransform(k, 0, 0, k, (offX + sx) * dpr, (offY + sy) * dpr);
 
       // horizon glow
       if (def.glow) {
@@ -1255,9 +1614,9 @@
 
       // fill everything under the stage with ground so the panel sits on it
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const stageBottom = this.oy + 600 * this.scale;
+      const stageBottom = offY + 600 * zs;
       if (stageBottom < h && this.name !== "death") {
-        ctx.fillStyle = this.name === "survive" ? "#2a3038" : this.name === "death" ? "#030203" : INK;
+        ctx.fillStyle = this.name === "survive" ? "#2a3038" : this.name === "map" ? "#0b1210" : INK;
         ctx.fillRect(0, stageBottom - 1, w, h - stageBottom + 1);
       }
 
@@ -1282,6 +1641,13 @@
         ctx.fillRect(0, 0, w + 160, h + 160);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.globalAlpha = 1;
+      }
+
+      // white flash from explosions
+      if (this.white > 0.01) {
+        ctx.fillStyle = `rgba(255,244,228,${this.white})`;
+        ctx.fillRect(0, 0, w, h);
+        this.white *= Math.pow(0.04, dt);
       }
 
       // transition cover
