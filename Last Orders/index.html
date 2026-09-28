@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Last Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800;900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-screen="title" data-mode="full">
+  <canvas id="scene" aria-hidden="true"></canvas>
+
+  <header id="hud">
+    <span class="brand">Last Orders</span>
+    <ol id="pips" aria-label="Decisions">
+      <li>I</li><li>II</li><li>III</li><li>IV</li>
+    </ol>
+    <button id="sound" type="button" aria-pressed="true">Sound on</button>
+  </header>
+
+  <section id="title" class="title" aria-labelledby="logo">
+    <p class="dispatch">Transmission · 14 November 2031 · 21:40</p>
+    <h1 class="logo" id="logo">Last<br><span>Orders</span></h1>
+    <p class="tagline">One night. Four decisions. The last ship leaves at dawn.</p>
+    <div class="actions">
+      <button class="btn primary" id="begin" type="button">Begin</button>
+      <button class="btn" id="notesBtn" type="button">Designer’s Notes</button>
+    </div>
+    <p class="meta">An interactive ethics game about obedience, conscience, and whether the ends justify the means. About 5 minutes. Best with sound.</p>
+    <p class="meta" id="found"></p>
+  </section>
+
+  <aside id="panel" class="panel" hidden>
+    <div id="panelInner" class="panel-inner"></div>
+  </aside>
+
+  <section id="ending" class="ending" hidden></section>
+
+  <section id="doc" class="doc" hidden>
+    <div id="docInner" class="doc-inner"></div>
+  </section>
+
+  <script src="js/story.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/scenes.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
