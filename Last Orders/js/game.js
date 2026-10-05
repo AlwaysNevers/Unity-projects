@@ -9,7 +9,7 @@
   const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const ROMAN = ["", "I", "II", "III", "IV"];
   const FW = ["util", "kant", "virtue"];
-  const ENDING_ORDER = ["last_aboard", "silent_radio", "miras_place", "coordinates", "clean_hands"];
+  const ENDING_ORDER = ["the_road", "the_tide", "twelve", "pier_four", "clean_hands"];
   const HOLD_MS = 900;
   const CHIP = { util: "Util", kant: "Kant", virtue: "Virtue" };
   const DECIDE_MS = 20000;
@@ -21,15 +21,15 @@
     pliers: '<path d="M9 3l2 8M15 3l-2 8"/><circle cx="12" cy="12" r="1.5"/><path d="M11 13l-4 8M13 13l4 8"/>',
     shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
     mute: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/>',
-    run: '<path d="M10 4H5v16h5"/><path d="M14 8l4 4-4 4M18 12H9"/>',
+    heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.1 4.1 0 0 1 12 7.4a4.1 4.1 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20z"/>',
     hand: '<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5"/><path d="M11 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M14 11V6a1.5 1.5 0 0 1 3 0v8c0 4-3 7-6.5 7-2.5 0-4.2-1.4-5.3-3.4L3.4 14a1.5 1.5 0 0 1 2.5-1.6L8 15"/>',
     crosshair: '<circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1"/>',
     pistol: '<path d="M3 8h16l2 2v3h-9l-1.2 5H7.5l1.2-5H5a2 2 0 0 1-2-2z"/><path d="M12 13c0 1.2.8 2 2 2"/>',
     cross: '<circle cx="12" cy="12" r="9"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/>',
-    ship: '<path d="M3 15l2 5h14l2-5z"/><path d="M6 15v-4h12v4M9 11V7h4v4M11 7V4"/>',
     child: '<circle cx="12" cy="5.5" r="2.5"/><path d="M12 8v7M8 11l4-2 4 2M9 21l3-6 3 6"/>',
-    radio: '<path d="M12 11v10M9 21h6M10 21l2-10 2 10"/><circle cx="12" cy="9" r="1.5"/><path d="M8.5 5.5a5 5 0 0 1 7 0M6 3a8.5 8.5 0 0 1 12 0"/>',
-    radiooff: '<path d="M12 11v10M9 21h6M10 21l2-10 2 10"/><circle cx="12" cy="9" r="1.5"/><path d="M3 3l18 18"/>',
+    truck: '<path d="M2 6h12v10H2zM14 10h4l3 3.5V16h-7z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+    boat: '<path d="M3 13h18l-3 6H6z"/><path d="M9 13L5 6M15 13l4-7"/>',
+    unit: '<circle cx="8" cy="8" r="2.5"/><circle cx="16" cy="8" r="2.5"/><path d="M3.5 19c0-3 2-5 4.5-5s4.5 2 4.5 5M11.5 19c0-3 2-5 4.5-5s4.5 2 4.5 5"/>',
     util: '<path d="M12 3v17M7 20h10M4 7h16"/><path d="M4 7L1.5 13h5zM20 7l-2.5 6h5z"/>',
     kant: '<path d="M3 21h18M5 18h14M4 8h16L12 3z"/><path d="M6.5 18V8M10 18V8M14 18V8M17.5 18V8"/>',
     virtue: '<path d="M12 21c-4-1.5-7-5.5-7-11M12 21c4-1.5 7-5.5 7-11"/><path d="M5 10c-1.5-1-2-2.5-1.8-4 1.5.2 2.6 1.3 2.8 3M6.5 14c-2-.5-3-2-3.2-3.5 1.6 0 3 1 3.5 2.6M8.6 17.4c-2 .1-3.5-.9-4-2.3 1.6-.4 3.2.3 4 1.6M19 10c1.5-1 2-2.5 1.8-4-1.5.2-2.6 1.3-2.8 3M17.5 14c2-.5 3-2 3.2-3.5-1.6 0-3 1-3.5 2.6M15.4 17.4c2 .1 3.5-.9 4-2.3-1.6-.4-3.2.3-4 1.6"/>'
@@ -720,7 +720,7 @@
     runId++;
     screen("title");
     scene("title");
-    const n = found.get().length;
+    const n = found.get().filter((x) => ENDING_ORDER.includes(x)).length;
     $("#found").textContent = n ? `Endings found: ${n} of ${ENDING_ORDER.length}` : `${ENDING_ORDER.length} endings to find.`;
   }
 

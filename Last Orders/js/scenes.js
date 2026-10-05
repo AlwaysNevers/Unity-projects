@@ -581,15 +581,15 @@
           const occl = !passed && (Math.abs(bootX - gx) < 40 || Math.abs(bootX - 60 - gx) < 30);
           const a = (occl ? 0.02 : 0.16 + 0.05 * Math.sin(t * 2 + i)) * (passed ? 0.35 : 1);
           // flashlight beams through the cracks
-          const g = ctx.createLinearGradient(0, 90, 0, 560);
+          const g = ctx.createLinearGradient(0, 90, 0, 490);
           g.addColorStop(0, `rgba(200,215,235,${a * 2})`);
           g.addColorStop(1, "rgba(200,215,235,0)");
           ctx.fillStyle = g;
           ctx.beginPath();
           ctx.moveTo(gx - 3, 90);
           ctx.lineTo(gx + 3, 90);
-          ctx.lineTo(gx + 60, 560);
-          ctx.lineTo(gx - 10, 560);
+          ctx.lineTo(gx + 52, 490);
+          ctx.lineTo(gx - 8, 490);
           ctx.fill();
           ctx.fillStyle = occl ? "#000" : `rgba(220,230,245,${0.5 + a})`;
           ctx.fillRect(gx - 3, 86, 6, 5);
@@ -598,25 +598,61 @@
           ctx.fillStyle = "#030303";
           ctx.fillRect(x, 70, 24, 30);
         }
-        // huddled survivors along the wall
-        const R = rng(4);
-        const spots = [110, 175, 235, 300, 360, 590, 650, 710, 770, 830, 880];
-        spots.forEach((x) => {
-          const h = 70 + R() * 20;
-          person(ctx, x, 540, h, { pose: R() < 0.6 ? "huddle" : "sit", facing: R() < 0.5 ? 1 : -1, lean: 0.1 });
+        const v = S.opts.variant || "";
+        const crying = v !== "passed";
+        // the floor sits high and the people are drawn large, so Eli stays in view above the choice cards
+        const F = 480;
+        // your squad, pressed against the walls
+        [[115, 1], [240, 1], [345, -1], [690, -1], [810, -1]].forEach(([x, f], i) => {
+          person(ctx, x, F, 110 + (i % 2) * 10, { pose: i % 2 ? "huddle" : "sit", helmet: i % 2 === 0, facing: f, lean: 0.1 });
+          ctx.fillStyle = INK;
+          if (i % 2 === 0) rifle(ctx, x - 22 * f, F - 16, 110, f > 0 ? -1.75 : -1.39);
         });
-        // Tomas lying; you kneeling beside him
-        const breathe = Math.sin(t * 2.4) * 1.5;
-        ctx.save();
-        ctx.translate(0, breathe * 0.3);
-        person(ctx, 470, 548, 80, { pose: "lie" });
-        ctx.restore();
-        person(ctx, 440, 548, 86, { pose: "kneel", helmet: true, arms: "forward" });
+        // Okafor, reaching toward you
+        person(ctx, 572, F + 8, 110, { pose: "kneel", helmet: true, arms: "forward", facing: -1 });
+        // you, kneeling, holding Eli
+        const shake = crying && !REDUCED ? Math.sin(t * 22) * 1 : 0;
+        person(ctx, 440, F + 8, 118, { pose: "kneel", helmet: true, arms: "forward", lean: 0.16 });
+        const bx = 469 + shake,
+          by = F - 46;
+        // a pale blanket, the only soft thing in the room
+        ctx.fillStyle = "#4a4037";
+        ctx.beginPath();
+        ctx.ellipse(bx, by, 21, 11, -0.35, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = "#5c5146";
+        ctx.beginPath();
+        ctx.arc(bx + 17, by - 9, 7, 0, TAU);
+        ctx.fill();
+        // his crying, rippling out through the dark
+        if (crying) {
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 3; i++) {
+            const ph = (t * 0.9 + i / 3) % 1;
+            ctx.strokeStyle = `rgba(235,215,190,${0.4 * (1 - ph)})`;
+            ctx.beginPath();
+            ctx.arc(bx + 16, by - 9, 13 + ph * 90, -Math.PI * 0.95, -Math.PI * 0.05);
+            ctx.stroke();
+          }
+        }
         ctx.fillStyle = "#050404";
-        ctx.fillRect(-2000, 540, 5000, 80);
+        ctx.fillRect(-2000, F, 5000, 200);
         // stairs silhouette at right
         ctx.fillStyle = "#070605";
-        for (let i = 0; i < 9; i++) ctx.fillRect(930 + i * 26, 540 - i * 50, 400, 50);
+        for (let i = 0; i < 8; i++) ctx.fillRect(930 + i * 26, F - i * 50, 400, 50);
+        if (v === "found") {
+          // the cellar door is open: a flashlight pours down the stairs
+          const fp = ease(clamp(S.st / 0.8, 0, 1));
+          ctx.globalCompositeOperation = "lighter";
+          glow(ctx, 1040, 200, 300, "rgba(215,225,245,A)", 0.4 * fp);
+          ctx.globalCompositeOperation = "source-over";
+          ctx.fillStyle = INK;
+          for (let i = 0; i < 8; i++) ctx.fillRect(930 + i * 26, F - i * 50, 400, 50);
+          ctx.globalCompositeOperation = "lighter";
+          lightCone(ctx, 950, 350, 2.98, 580, 0.2, "rgba(225,232,250,A)", 0.45 * fp);
+          ctx.globalCompositeOperation = "source-over";
+          person(ctx, 968, F - 50, 124, { helmet: true, rifle: "shoulder", facing: -1 });
+        }
       }
     },
 
@@ -806,7 +842,8 @@
           line(ctx, x + 80 * d, 255, x + 80 * d, 300);
         });
         // ship
-        const dep = S.opts.variant === "departing" ? ease(clamp(S.st / 30, 0, 1)) : 0;
+        const hv = S.opts.variant || "";
+        const dep = hv === "departing" || hv === "sailing" ? ease(clamp(S.st / 30, 0, 1)) : 0;
         const sx = 470 + dep * 260;
         const ss = 1 - dep * 0.35;
         const bob = Math.sin(t * 0.8) * 1.5;
@@ -853,13 +890,14 @@
           line(ctx, 430, 470, 520, 364);
           ctx.lineWidth = 1.5;
           line(ctx, 432, 452, 522, 346);
-          // you at its foot, mother & child
+          // you at its foot, a mother & child boarding
           person(ctx, 452, 472, 84, { helmet: true, rifle: "sling", facing: -1 });
           person(ctx, 392, 474, 76, { arms: "out", bulky: true, facing: 1 });
           person(ctx, 418, 474, 38, { facing: 1 });
-        } else {
-          person(ctx, 440, 472, 80, { helmet: false, facing: 1, bulky: true });
-          person(ctx, 460, 472, 84, { helmet: true, facing: 1 });
+        } else if (hv === "departing") {
+          // left behind on the pier
+          person(ctx, 432, 472, 80, { helmet: true, rifle: "sling", facing: 1 });
+          person(ctx, 462, 472, 84, { helmet: true, rifle: true, facing: 1 });
         }
         // gulls
         ctx.strokeStyle = "#1a1420";
@@ -877,119 +915,295 @@
       }
     },
 
-    lighthouse: {
-      sky: ["#05060c", "#141427", "#3d2a3a"],
-      horizon: 0.6,
-      glow: { x: 250, y: 380, r: 450, c: "rgba(255,120,60,A)", a: 0.3 },
-      weather: "stars",
-      flashes: 0.4,
-      flashZone: [60, 380],
-      audio: { wind: 0.45, rumble: 0.3, sea: 0.35, drone: 0.08 },
+    // The coast road: a boy at a machine gun, your truck full of wounded
+    road: {
+      sky: ["#070a12", "#1b2232", "#5e4850"],
+      horizon: 0.555,
+      glow: { x: 900, y: 332, r: 560, c: "rgba(255,150,110,A)", a: 0.3 },
+      weather: "ash",
+      flashes: 0.35,
+      flashZone: [-300, 260],
+      smoke: [{ x: 140, y: 370, rate: 1.1, s: 60 }],
+      audio: { wind: 0.35, rumble: 0.45, sea: 0.15, drone: 0.08 },
       draw(ctx, t, S) {
-        const strike = S.opts.variant === "strike";
-        // far hills with village & guns
-        ctx.fillStyle = "#120f1c";
-        ctx.beginPath();
-        ctx.moveTo(-2000, 400);
-        ctx.quadraticCurveTo(-200, 300, 200, 340);
-        ctx.quadraticCurveTo(420, 360, 560, 400);
-        ctx.lineTo(560, 420);
-        ctx.lineTo(-2000, 420);
-        ctx.fill();
-        // village lights & church
-        const R = rng(3);
-        for (let i = 0; i < 26; i++) {
-          const x = 60 + R() * 300,
-            y = 330 + R() * 30 + (x - 200) * 0.06;
-          ctx.fillStyle = `rgba(255,190,110,${strike ? 0.2 : 0.55 + 0.3 * Math.sin(t + i)})`;
-          ctx.fillRect(x, y, 2.5, 2.5);
-        }
-        ctx.fillStyle = "#120f1c";
-        ctx.fillRect(196, 298, 12, 40);
-        ctx.beginPath();
-        ctx.moveTo(192, 300);
-        ctx.lineTo(202, 280);
-        ctx.lineTo(212, 300);
-        ctx.fill();
-        // gun flashes from the village (muzzle)
-        if (!strike && Math.sin(t * 1.7) > 0.96) glow(ctx, 150 + (t * 37) % 160, 335, 30, "rgba(255,220,150,A)", 0.9);
-        if (strike) {
-          for (let i = 0; i < 4; i++) {
-            const ph = (S.st * 0.9 + i * 0.37) % 1;
-            if (ph < 0.2) glow(ctx, 90 + i * 70, 330, 90, "rgba(255,230,190,A)", (0.2 - ph) * 4);
-          }
-          S.emit("strike", 180, 330, 0.9, 60);
-        }
-        // sea
-        const sg = ctx.createLinearGradient(0, 400, 0, 600);
-        sg.addColorStop(0, "#1e1a2c");
-        sg.addColorStop(1, "#07070d");
+        // drawn 40 units high so Kit stays clear of the choice cards
+        ctx.save();
+        ctx.translate(0, -40);
+        const v = S.opts.variant || "";
+        const kit = v !== "taken";
+        const away = v === "taken" || v === "leave" ? ease(clamp(S.st / 7, 0, 1)) : 0;
+        // the sea, and the ships waiting at the harbor
+        const sg = ctx.createLinearGradient(0, 372, 0, 430);
+        sg.addColorStop(0, "#4a3d46");
+        sg.addColorStop(1, "#141520");
         ctx.fillStyle = sg;
-        ctx.fillRect(-2000, 404, 5000, 200);
-        for (let i = 0; i < 24; i++) {
-          const y = 410 + i * 7;
-          ctx.fillStyle = `rgba(160,160,210,${0.1 - i * 0.003})`;
-          ctx.fillRect(-400 + Math.sin(t * 0.7 + i) * 30, y, 1600, 1);
+        ctx.fillRect(-2000, 372, 5000, 80);
+        for (let i = 0; i < 10; i++) {
+          ctx.fillStyle = `rgba(255,190,150,${0.14 - i * 0.012})`;
+          ctx.fillRect(860 + Math.sin(t + i) * 12 - (60 - i * 5), 376 + i * 3.5, 120 - i * 10, 1.2);
         }
-        // harbor and ships far below-left
-        ctx.fillStyle = "#0a0912";
-        ctx.fillRect(-300, 404, 620, 10);
-        for (let i = 0; i < 5; i++) {
-          const x = -200 + i * 110 + (strike ? S.st * (3 + i) : 0);
-          ctx.fillRect(x, 396, 60, 10);
-          ctx.fillRect(x + 20, 386, 16, 10);
-          ctx.fillStyle = "rgba(255,200,120,0.6)";
-          ctx.fillRect(x + 8, 400, 2, 2);
-          ctx.fillRect(x + 40, 400, 2, 2);
-          ctx.fillStyle = "#0a0912";
-        }
-        // cliff
-        ctx.fillStyle = INK;
+        ctx.fillStyle = "#16151d";
+        [[760, 0.55], [870, 0.8], [990, 0.5]].forEach(([x, s]) => {
+          ctx.fillRect(x - 40 * s, 366, 80 * s, 7);
+          ctx.fillRect(x - 15 * s, 356, 26 * s, 10);
+          ctx.fillRect(x - 6 * s, 344, 5, 12 * s + 4);
+        });
+        // hills on the enemy side, falling away to the coast
+        ctx.fillStyle = "#121722";
         ctx.beginPath();
-        ctx.moveTo(560, 620);
-        ctx.lineTo(600, 470);
-        ctx.lineTo(640, 440);
-        ctx.lineTo(700, 400);
-        ctx.lineTo(2600, 390);
-        ctx.lineTo(2600, 620);
+        ctx.moveTo(-2000, 600);
+        ctx.lineTo(-2000, 352);
+        ctx.quadraticCurveTo(-300, 318, 160, 350);
+        ctx.quadraticCurveTo(470, 380, 640, 404);
+        ctx.lineTo(2600, 410);
+        ctx.lineTo(2600, 600);
         ctx.fill();
-        // lighthouse tower
-        const lx = 790;
-        ctx.beginPath();
-        ctx.moveTo(lx - 34, 402);
-        ctx.lineTo(lx - 22, 170);
-        ctx.lineTo(lx + 22, 170);
-        ctx.lineTo(lx + 34, 402);
-        ctx.fill();
-        ctx.fillRect(lx - 32, 160, 64, 10);
-        ctx.fillRect(lx - 20, 124, 40, 36);
-        ctx.beginPath();
-        ctx.moveTo(lx - 24, 124);
-        ctx.lineTo(lx, 100);
-        ctx.lineTo(lx + 24, 124);
-        ctx.fill();
-        // lantern room: dim — the lamp is dead; only the radio glows
-        ctx.fillStyle = "rgba(120,200,160,0.55)";
-        ctx.fillRect(lx - 14, 132, 28, 22);
-        person(ctx, lx - 2, 158, 26, { helmet: true, color: "#0b1210" });
-        // sweeping searchlight from the enemy side looking for you
-        const ang = -0.9 + Math.sin(t * 0.35) * 0.5;
         ctx.globalCompositeOperation = "lighter";
-        lightCone(ctx, 220, 340, ang, 900, 0.045, "rgba(220,225,255,A)", 0.18);
+        // the convoy's tail lights, crawling down toward the harbor
+        for (let i = 0; i < 6; i++) {
+          const x = 610 + ((i * 70 + S.st * 6) % 420);
+          glow(ctx, x, 405 + (x - 610) * 0.012, 7, "rgba(255,60,40,A)", 0.9);
+        }
+        // enemy armored cars back up the road; they come on once the gun stops
+        const ex = v === "taken" ? Math.min(S.st * 26, 260) : 0;
+        [[20, 434], [120, 442]].forEach(([x, y], i) => glow(ctx, x + ex, y, 30, "rgba(255,240,205,A)", 0.55 + 0.1 * Math.sin(t * 9 + i)));
         ctx.globalCompositeOperation = "source-over";
-        // small cottage & radio mast
-        ctx.fillStyle = INK;
-        ctx.fillRect(860, 368, 80, 36);
+        // near ground and the road sweeping down to the coast
+        ctx.fillStyle = "#0b0e15";
+        ctx.fillRect(-2000, 446, 5000, 200);
+        ctx.fillStyle = "#1a202c";
         ctx.beginPath();
-        ctx.moveTo(854, 370);
-        ctx.lineTo(900, 346);
-        ctx.lineTo(946, 370);
+        ctx.moveTo(-600, 436);
+        ctx.quadraticCurveTo(300, 452, 1400, 540);
+        ctx.lineTo(1400, 640);
+        ctx.quadraticCurveTo(300, 494, -600, 446);
         ctx.fill();
+        // the gun nest, drawn a little larger so Kit reads at a glance
+        ctx.save();
+        ctx.translate(360, 480);
+        ctx.scale(1.3, 1.3);
+        ctx.translate(-360, -480);
+        ctx.fillStyle = INK;
         ctx.strokeStyle = INK;
-        ctx.lineWidth = 2;
-        line(ctx, 960, 400, 960, 250);
-        line(ctx, 960, 260, 930, 400);
-        line(ctx, 960, 260, 990, 400);
+        ctx.lineWidth = 3;
+        line(ctx, 352, 458, 340, 474);
+        line(ctx, 352, 458, 364, 474);
+        ctx.fillRect(338, 451, 28, 9);
+        ctx.fillRect(298, 453, 42, 3.5);
+        ctx.fillRect(366, 462, 14, 10);
+        if (kit) person(ctx, 384, 480, 56, { pose: "kneel", helmet: true, arms: "forward", facing: -1 });
+        for (let r = 0; r < 2; r++)
+          for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            ctx.ellipse(282 + i * 22 + r * 11, 480 - r * 12, 13, 7.5, 0, 0, TAU);
+            ctx.fill();
+          }
+        // Kit fires in bursts while he's at the gun
+        const cycle = Math.floor(t / 2.4);
+        const firing = kit && t % 2.4 < 1.1;
+        if (firing) {
+          if (S.local.burst !== cycle) {
+            S.local.burst = cycle;
+            if (window.AudioFX) AudioFX.shots(4);
+          }
+          ctx.globalCompositeOperation = "lighter";
+          if (Math.sin(t * 70) > 0) glow(ctx, 296, 455, 26, "rgba(255,225,160,A)", 0.95);
+          ctx.strokeStyle = "rgba(255,190,110,0.85)";
+          ctx.lineWidth = 1.6;
+          for (let k = 0; k < 5; k++) {
+            const ph = (t * 2.6 + k / 5) % 1;
+            const x = 290 - ph * 400;
+            const y = 455 - ph * 18;
+            line(ctx, x, y, x + 16, y + 0.7);
+          }
+          ctx.globalCompositeOperation = "source-over";
+        }
+        ctx.restore();
+        // your truck, a red cross on the canvas
+        ctx.save();
+        ctx.translate(away * 820, away * 24);
+        ctx.fillStyle = INK;
+        ctx.beginPath();
+        roundRect(ctx, 560, 452, 232, 104, 22);
+        ctx.fill();
+        ctx.fillRect(552, 540, 250, 16);
+        ctx.beginPath();
+        ctx.moveTo(796, 556);
+        ctx.lineTo(796, 470);
+        ctx.lineTo(858, 470);
+        ctx.lineTo(884, 506);
+        ctx.lineTo(892, 556);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "rgba(140,160,185,0.16)";
+        ctx.beginPath();
+        ctx.moveTo(806, 478);
+        ctx.lineTo(852, 478);
+        ctx.lineTo(870, 503);
+        ctx.lineTo(806, 503);
+        ctx.fill();
+        ctx.fillStyle = "rgba(205,195,180,0.1)";
+        ctx.beginPath();
+        ctx.arc(676, 500, 24, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = "rgba(200,60,50,0.55)";
+        ctx.fillRect(670, 486, 12, 28);
+        ctx.fillRect(662, 494, 28, 12);
+        ctx.fillStyle = INK;
+        [612, 700, 850].forEach((x) => {
+          ctx.beginPath();
+          ctx.arc(x, 562, 21, 0, TAU);
+          ctx.fill();
+        });
+        ctx.globalCompositeOperation = "lighter";
+        glow(ctx, 556, 528, 26, "rgba(255,50,30,A)", away ? 0.5 : 0.85);
+        glow(ctx, 894, 522, 70, "rgba(255,240,200,A)", 0.45);
+        ctx.globalCompositeOperation = "source-over";
+        ctx.restore();
+        // you, calling to him from the back of the truck
+        if (!away) person(ctx, 522, 578, 118, { helmet: true, arms: "out", facing: -1 });
+        ctx.fillStyle = INK;
+        ctx.fillRect(-2000, 576, 5000, 200);
+        ctx.restore();
+      }
+    },
+
+    // A hidden cove: a boat on the ebb tide, the harbor burning far off.
+    // Composed high in the frame so the boat stays above the choice cards.
+    cove: {
+      sky: ["#04060c", "#121829", "#3b3141"],
+      horizon: 0.5,
+      glow: { x: 40, y: 300, r: 480, c: "rgba(255,120,60,A)", a: 0.4 },
+      weather: "stars",
+      flashes: 0.5,
+      flashZone: [-260, 220],
+      audio: { wind: 0.45, rumble: 0.35, sea: 0.5, drone: 0.07 },
+      draw(ctx, t, S) {
+        const v = S.opts.variant || "";
+        const drift = v === "drift" ? ease(clamp(S.st / 16, 0, 1)) : 0;
+        // sea
+        const sg = ctx.createLinearGradient(0, 300, 0, 560);
+        sg.addColorStop(0, "#272638");
+        sg.addColorStop(1, "#06070c");
+        ctx.fillStyle = sg;
+        ctx.fillRect(-2000, 300, 5000, 400);
+        // the harbor, three kilometers off: burning, with ships at the piers
+        const docks = S.cached("cv-docks", () => makeSkyline(23, -420, 230, 300, 6, 34, 0.5));
+        drawSkyline(ctx, docks, "#15111a", t, "rgba(255,170,90,1)");
+        fire(ctx, 20, 300, 14, t, 41);
+        fire(ctx, 150, 301, 10, t, 43);
+        ctx.fillStyle = "#15111a";
+        [-120, 40, 190].forEach((x) => {
+          ctx.fillRect(x, 294, 54, 7);
+          ctx.fillRect(x + 16, 285, 18, 9);
+        });
+        // tracers over the docks
+        ctx.globalCompositeOperation = "lighter";
+        ctx.strokeStyle = "rgba(255,190,120,0.8)";
+        ctx.lineWidth = 1.2;
+        for (let i = 0; i < 5; i++) {
+          const ph = (t * 0.8 + i * 0.27) % 1;
+          const x = -160 + i * 75 + ph * 70;
+          const y = 292 - ph * 14;
+          line(ctx, x, y, x + 9, y - 2);
+        }
+        ctx.globalCompositeOperation = "source-over";
+        // neutral ships waiting past the cape, lights on
+        const nx = 905;
+        ctx.fillStyle = "#1a1828";
+        ctx.fillRect(nx - 50, 294, 100, 8);
+        ctx.fillRect(nx - 20, 284, 40, 10);
+        ctx.fillRect(nx - 3, 268, 3, 16);
+        ctx.fillStyle = "rgba(200,240,210,0.9)";
+        ctx.fillRect(nx - 3, 266, 3, 3);
+        ctx.fillStyle = "rgba(255,230,170,0.6)";
+        for (let i = 0; i < 6; i++) ctx.fillRect(nx - 40 + i * 15, 297, 2, 2);
+        // the ebb tide: streaks drifting out to sea
+        for (let i = 0; i < 52; i++) {
+          const y = 312 + i * 4.8;
+          const x = ((i * 137 + S.st * (10 + (i % 7) * 4)) % 1500) - 300;
+          ctx.fillStyle = `rgba(170,175,220,${0.14 - i * 0.0018})`;
+          ctx.fillRect(x, y, 18 + (i % 5) * 9, 1.2);
+        }
+        // the cliff path, sloping down into the cove
+        ctx.fillStyle = INK;
+        ctx.beginPath();
+        ctx.moveTo(-2000, 700);
+        ctx.lineTo(-2000, 342);
+        ctx.lineTo(60, 336);
+        ctx.quadraticCurveTo(280, 338, 370, 366);
+        ctx.quadraticCurveTo(450, 395, 480, 470);
+        ctx.lineTo(520, 700);
+        ctx.fill();
+        // enemy flashlights on the path, between you and the docks
+        ctx.globalCompositeOperation = "lighter";
+        [[30, 0], [130, 1.7]].forEach(([x, p]) => {
+          lightCone(ctx, x, 328, 0.1 + Math.sin(t * 0.6 + p) * 0.28, 260, 0.12, "rgba(225,230,250,A)", 0.22);
+          glow(ctx, x, 328, 10, "rgba(255,255,240,A)", 0.9);
+        });
+        const L = S.local;
+        L.mf = L.mf || [];
+        if (!REDUCED && Math.random() < 1.4 * S.dt) {
+          L.mf.push({ x: -220 + Math.random() * 300, y: 318 + Math.random() * 14, life: 0 });
+          if (window.AudioFX && Math.random() < 0.6) AudioFX.shots(1);
+        }
+        L.mf.forEach((f) => {
+          f.life += S.dt;
+          glow(ctx, f.x, f.y, 22, "rgba(255,225,160,A)", Math.max(0, 1 - f.life / 0.14));
+        });
+        L.mf = L.mf.filter((f) => f.life < 0.14);
+        ctx.globalCompositeOperation = "source-over";
+        // you, with the radio, looking down at the boat
+        if (!v) {
+          person(ctx, 300, 342, 88, { helmet: true, rifle: "sling", facing: 1 });
+          if (Math.sin(t * 5) > 0.2) {
+            ctx.globalCompositeOperation = "lighter";
+            glow(ctx, 289, 290, 8, "rgba(120,255,170,A)", 0.9);
+            ctx.globalCompositeOperation = "source-over";
+          }
+        }
+        // a little jetty
+        ctx.fillStyle = INK;
+        ctx.fillRect(460, 412, 180, 6);
+        [490, 535, 580, 628].forEach((x) => ctx.fillRect(x, 412, 6, 40));
+        // the boat, bobbing on the tide
+        const bob = Math.sin(t * 1.4) * 2.2;
+        const bx = lerp(700, 960, drift),
+          by = lerp(426, 350, drift) + bob * (1 - drift * 0.6);
+        const bs = lerp(1, 0.42, drift);
+        if (!drift) {
+          ctx.strokeStyle = INK;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(636, 415);
+          ctx.quadraticCurveTo(650, 430, bx - 50, by - 8);
+          ctx.stroke();
+        }
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.scale(bs, bs);
+        ctx.rotate(Math.sin(t * 1.1) * 0.03);
+        ctx.fillStyle = INK;
+        ctx.beginPath();
+        ctx.moveTo(-56, -11);
+        ctx.lineTo(56, -13);
+        ctx.quadraticCurveTo(48, 8, 30, 10);
+        ctx.lineTo(-40, 10);
+        ctx.quadraticCurveTo(-56, 4, -56, -11);
+        ctx.fill();
+        ctx.fillRect(-4, -26, 3, 14);
+        if (drift) person(ctx, 14, -11, 44, { pose: "sit", helmet: true, lean: 0.25, facing: -1 });
+        ctx.restore();
+        // the far arm of the cove
+        ctx.fillStyle = INK;
+        ctx.beginPath();
+        ctx.moveTo(1060, 700);
+        ctx.lineTo(1080, 450);
+        ctx.quadraticCurveTo(1200, 410, 2600, 420);
+        ctx.lineTo(2600, 700);
+        ctx.fill();
+        ctx.fillStyle = "rgba(6,7,12,0.85)";
+        ctx.fillRect(-2000, 540, 5000, 160);
       }
     },
 
@@ -1059,8 +1273,8 @@
   SCENES.intro = SCENES.title;
 
   // Tactical map shown between chapters
-  const FRONT = [60, 200, 330, 520, 690];
-  const ROADS = [["veyra", "bridge"], ["bridge", "prisoner"], ["bridge", "cellar"], ["prisoner", "checkpoint"], ["prisoner", "captured"], ["cellar", "checkpoint"], ["cellar", "captured"], ["checkpoint", "signal"], ["checkpoint", "boat"], ["captured", "signal"], ["signal", "boat"]];
+  const FRONT = [60, 200, 330, 520, 720];
+  const ROADS = [["veyra", "bridge"], ["bridge", "prisoner"], ["bridge", "cellar"], ["prisoner", "checkpoint"], ["prisoner", "captured"], ["cellar", "checkpoint"], ["cellar", "captured"], ["checkpoint", "cove"], ["checkpoint", "gunner"], ["captured", "cove"], ["cove", "harbor"], ["gunner", "harbor"]];
   const COAST = [[905, -600], [900, 0], [870, 80], [838, 150], [852, 220], [880, 280], [858, 332], [882, 400], [905, 480], [885, 600], [900, 1200]];
   SCENES.map = {
     sky: ["#0b1210", "#0b1210", "#0b1210"],
@@ -1232,7 +1446,7 @@
         ctx.textAlign = "left";
       }
       // destination
-      const H = P.boat;
+      const H = P.harbor;
       ctx.strokeStyle = "rgba(233,162,59,0.8)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -1315,11 +1529,12 @@
   Object.assign(SCENES.title, { focal: { x: 620, y: 440 } });
   Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 560, blast: [520, 372] });
   Object.assign(SCENES.farmhouse, { focal: { x: 450, y: 420 } });
-  Object.assign(SCENES.cellar, { focal: { x: 460, y: 470 } });
+  Object.assign(SCENES.cellar, { focal: { x: 470, y: 420 } });
   Object.assign(SCENES.checkpoint, { focal: { x: 500, y: 460 } });
   Object.assign(SCENES.camp, { focal: { x: 500, y: 480 } });
   Object.assign(SCENES.harbor, { focal: { x: 450, y: 420 }, barrageZone: [-250, 350, 440] });
-  Object.assign(SCENES.lighthouse, { focal: { x: 700, y: 260 }, pfocus: 620, barrageZone: [60, 380, 330] });
+  Object.assign(SCENES.road, { focal: { x: 500, y: 430 }, pfocus: 500, barrageZone: [100, 900, 430] });
+  Object.assign(SCENES.cove, { focal: { x: 500, y: 380 }, pfocus: 500 });
 
   function tank(ctx, x, y, s, color) {
     ctx.save();
@@ -1510,12 +1725,6 @@
         this.flashes.push({ x: 250 + Math.random() * 500, y: 600 * (d.horizon || 0.7) - 20, life: 0, max: 1.3, big: 1.8 });
         this.shakeAmt = 7;
         if (A) A.boom(0.35, 1.1);
-      } else if (name === "incoming") {
-        if (A) A.whistle();
-        setTimeout(() => {
-          this.explode(790, 170, 1.8);
-          this.whiteout(1);
-        }, 1500);
       }
     }
 

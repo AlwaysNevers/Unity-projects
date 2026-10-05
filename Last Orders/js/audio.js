@@ -287,24 +287,6 @@
         o.stop(st + 0.2);
       });
     },
-    // Incoming shell
-    whistle() {
-      if (!this.ctx) return;
-      const t = this.ctx.currentTime;
-      const o = this.ctx.createOscillator();
-      o.type = "sine";
-      o.frequency.setValueAtTime(1500, t);
-      o.frequency.exponentialRampToValueAtTime(380, t + 1.5);
-      const g = this.ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.14, t + 0.3);
-      g.gain.setValueAtTime(0.14, t + 1.4);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.52);
-      o.connect(g).connect(this.master);
-      o.start(t);
-      o.stop(t + 1.6);
-    },
-
     sting(kind) {
       if (!this.ctx) return;
       const ctx = this.ctx;

@@ -15,8 +15,8 @@ Open `index.html` in any modern browser (Chrome, Edge, Firefox, Safari). Nothing
 
 | | |
 |---|---|
-| **Dilemmas** | The Bridge · The Prisoner · The Cellar · The Checkpoint · The Colonel's Offer · The Last Boat · The Signal |
-| **Endings** | The Last Aboard (survive) · The Silent Radio (survive) · Mira's Place · The Coordinates · Clean Hands |
+| **Dilemmas** | The Bridge · The Prisoner · The Cellar (the crying baby) · The Checkpoint · The Colonel's Offer · The Gunner · The Tide |
+| **Endings** | The Road Held (survive) · The Ebb Tide (survive) · Twelve Years Old · Pier Four · Clean Hands |
 | **Ethical perspectives** | Utilitarianism (Bentham, Mill) · Kantian ethics · Virtue ethics (Aristotle) |
 | **Moral profile** | After each ending, a triangle between the three philosophies traces your path decision by decision and lands on your profile (Utilitarian, Kantian, Virtue Ethicist, or Pluralist). Tap any decision card to see why each philosophy agreed or disagreed. |
 | **Designer's Notes** | The ethical issue, historical context, the three frameworks, the philosophical questions, and the designer's own reasoning and conclusions |

@@ -42,8 +42,9 @@ window.STORY = {
     cellar: { x: 410, y: 395, name: "OSTRAVA" },
     captured: { x: 590, y: 165, name: "ENEMY CAMP" },
     checkpoint: { x: 645, y: 345, name: "CHECKPOINT B-7" },
-    signal: { x: 822, y: 150, name: "CAPE LORN" },
-    boat: { x: 846, y: 332, name: "SALTMARSH" }
+    cove: { x: 838, y: 200, name: "GULL COVE" },
+    gunner: { x: 752, y: 394, name: "COAST ROAD" },
+    harbor: { x: 846, y: 332, name: "SALTMARSH" }
   },
 
   nodes: {
@@ -94,8 +95,8 @@ window.STORY = {
             { text: "You switch off the radio and wait.", variant: "crossing" },
             "The last family reaches your side. Then the first tank rolls onto the bridge.",
             { text: "You press the button. The tank goes down with the bridge.", fx: "explosion", variant: "blowntank" },
-            { text: "The other tanks open fire. Harrow is killed. Your unit scatters.", fx: "shots" },
-            "You’re alone now, with twelve of the refugees you saved."
+            { text: "The other tanks open fire. Harrow is killed.", fx: "shots" },
+            "You and five soldiers from your unit escape into the dark."
           ],
           next: "cellar"
         }
@@ -180,62 +181,64 @@ window.STORY = {
     cellar: {
       chapter: 2,
       title: "The Cellar",
-      place: "St. Ada’s school, Ostrava",
+      place: "Your mother’s house, Ostrava",
       time: "00:40",
       km: 33,
       scene: "cellar",
       theme: "Ends vs. means",
       beats: [
-        "You and the twelve refugees hide in the basement of a bombed school.",
-        "Above you, an enemy patrol is searching the building. If they find you, they’ll kill everyone.",
-        "Tomas, one of the refugees, is wounded and feverish. He’s moaning, louder and louder. The patrol will hear.",
-        "A woman hands you her scarf. She means: keep him quiet, even if it kills him.",
-        "Your other option: run out the back and make noise, so the patrol chases you instead."
+        "Ostrava, your hometown. Your mother has been looking after your baby son here since the war began.",
+        "She’s gone. But Eli is here, asleep in a drawer by the stove. He’s two months old.",
+        "An enemy patrol turns into the street. You and your five soldiers hide in the cellar, Eli in your arms.",
+        "It’s hot and airless down here. Eli wakes up and starts to scream. Nothing you do calms him.",
+        { who: "Pvt. Okafor", text: "Wren, keep him quiet. If they hear him, they’ll kill all of us. Him too." },
+        "Boots cross the floor above you. The only way to silence him now is to smother him."
       ],
-      prompt: "Silence Tomas?",
-      dilemma: "Is it right to kill one innocent person to save many?",
+      prompt: "Silence your son?",
+      dilemma: "Is it right to kill your own child to save everyone else?",
       choices: [
         {
           key: "A",
           label: "Silence him",
-          sub: "Hold the scarf over his mouth.",
-          pro: "The patrol won’t hear. Twelve people live.",
-          con: "Tomas will probably die, by your hands.",
+          sub: "Cover his mouth until he stops.",
+          pro: "The patrol won’t hear. Six people live.",
+          con: "You kill your own son.",
           icon: "mute",
           tags: { obey: null, ends: true },
           beats: [
-            "You hold the scarf over his mouth. He barely struggles.",
-            { text: "The footsteps stop. Someone laughs. Then the patrol moves on.", variant: "passed" },
-            "Twelve people climb out at dawn. Tomas doesn’t."
+            "You press your hand over his mouth and hold him close. You don’t let go.",
+            { text: "The footsteps stop above you. Then they move on.", variant: "passed" },
+            "At dawn, you and five soldiers climb out of the cellar. Nobody says a word."
           ],
           next: "checkpoint"
         },
         {
           key: "B",
-          label: "Draw them away",
-          sub: "Run out and make noise.",
-          pro: "You don’t kill anyone.",
-          con: "You’ll likely be caught. If the trick fails, all 13 die.",
-          icon: "run",
+          label: "Let him cry",
+          sub: "Hold him close and hope.",
+          pro: "You don’t harm your son.",
+          con: "If the patrol hears, they may kill all of you, Eli too.",
+          icon: "heart",
           tags: { obey: null, ends: false },
           beats: [
-            { text: "You kick over barrels in the street. Every flashlight turns toward you.", fx: "shots", variant: "passed" },
-            "You almost reach the trees.",
-            "The patrol never checks the school. Everyone in the basement lives.",
-            "You’re taken to an enemy camp."
+            "You hold Eli against your chest and pray.",
+            { text: "The cellar door bursts open. A flashlight finds you.", variant: "found" },
+            "Your squad is dragged out at gunpoint. An old neighbor begs to take Eli, and the soldiers let her.",
+            { who: "Neighbor", text: "I’ll get him to the ships. I promise." },
+            "You’re marched to an enemy camp."
           ],
           next: "captured"
         }
       ],
       debrief: {
-        concept: "The trolley problem, up close",
-        context: "Based on the trolley problem by philosophers Philippa Foot and Judith Jarvis Thomson.",
+        concept: "The crying baby dilemma",
+        context: "Psychologist Joshua Greene used this “crying baby” dilemma to study how the brain makes moral choices. People are deeply divided on it.",
         lenses: {
-          util: { verdict: "A", says: "One death is better than risking thirteen.", text: "Silencing Tomas means one likely death instead of risking thirteen. The numbers favor it." },
-          kant: { verdict: "B", says: "You may risk your life, not take his.", text: "Killing an innocent person with your own hands is wrong. You may risk your own life, but you may not take his." },
-          virtue: { verdict: "B", says: "Protecting everyone yourself is the brave choice.", text: "Drawing the patrol away takes courage and protects everyone, Tomas included. A good person would try it." }
+          util: { verdict: "A", says: "If you’re found, he dies anyway. Save the rest.", text: "If the patrol finds you, everyone dies, Eli included. Silencing him costs no extra life and saves six. Utilitarians say the numbers decide, even here." },
+          kant: { verdict: "B", says: "Never kill an innocent, even to save others.", text: "Killing an innocent person is wrong, whatever it saves. Smothering Eli makes his death the tool that saves everyone else, and a parent has a special duty to protect their child." },
+          virtue: { verdict: "split", says: "A tragic dilemma: no choice leaves a good person whole.", text: "Philosopher Rosalind Hursthouse calls this a tragic dilemma. A loving parent can’t do it, but a wise person can’t ignore five other lives either. Whatever you choose scars you." }
         },
-        question: "Why does it feel worse to do it with your own hands than by pulling a lever?"
+        question: "Does it matter that he’s your own child? Should we care more about our family than about strangers?"
       }
     },
 
@@ -270,9 +273,9 @@ window.STORY = {
             { text: "The car skids into the sandbags and stops.", variant: "stopped" },
             "Its brakes had failed. Inside: a father and his little boy. No bomb.",
             { who: "Major Voss", text: "You got lucky. Next time it’s a bomb, and we all die." },
-            { text: "You’re arrested. Then the shelling starts, and you escape toward the cliffs.", fx: "boom" }
+            { text: "You’re arrested. Then the shelling starts, and in the chaos you escape alone.", fx: "boom" }
           ],
-          next: "signal"
+          next: "cove"
         },
         {
           key: "A",
@@ -286,9 +289,9 @@ window.STORY = {
             { text: "Everyone on the line fires.", fx: "shots", variant: "stopped" },
             "There was no bomb. The brakes had failed. Inside: a father and his seven-year-old son.",
             { who: "Major Voss", text: "You followed orders. It’s not your fault." },
-            "At dawn, a truck takes you down to the harbor."
+            { text: "Then the enemy breaks through. Voss puts you behind the wheel of a truck full of wounded.", fx: "boom" }
           ],
-          next: "boat"
+          next: "gunner"
         }
       ],
       debrief: {
@@ -332,10 +335,10 @@ window.STORY = {
           beats: [
             "Your hands shake so badly you need both of them.",
             { text: "The fisherman closes his eyes.", fx: "shot", variant: "shot" },
-            "The colonel keeps his word. At dawn, nine prisoners walk free.",
+            "The colonel keeps his word. Nine prisoners are pushed out into the dark.",
             { who: "Colonel Anselm", text: "You see? War turns all of us into something." }
           ],
-          next: "signal"
+          next: "cove"
         },
         {
           key: "B",
@@ -365,136 +368,143 @@ window.STORY = {
       }
     },
 
-    /* ───────────────────────── IV ───────────────────────── */
-    boat: {
+    /* ───────────────────────── IV (after firing) ───────────────────────── */
+    gunner: {
       chapter: 4,
-      title: "The Last Boat",
-      place: "Saltmarsh Harbor, pier 4",
-      time: "05:40",
-      km: 0,
-      scene: "harbor",
-      theme: "Orders vs. conscience",
+      title: "The Gunner",
+      place: "The coast road",
+      time: "05:20",
+      km: 6,
+      scene: "road",
+      theme: "Ends vs. means",
       beats: [
-        "Saltmarsh Harbor. The last ship out, the Aurora, is almost full. Shells are landing nearby.",
-        "Your order: guard the boarding ramp. Only soldiers may get on now.",
-        "A mother pushes through the crowd with her six-year-old daughter, Mira.",
-        { who: "Mira’s mother", text: "Please. Just take her. She’s small." },
-        "There’s room for exactly one more person: you. If Mira takes your place, you stay behind."
+        "The front has collapsed. You’re driving the last truck in a convoy of a hundred wounded men.",
+        "Enemy armored cars are chasing the convoy down the coast road.",
+        "One machine gun is holding them back. The gunner is Kit, the boy who carried water for your platoon in Veyra. He’s twelve.",
+        { who: "Kit", text: "Corporal Wren! I held them, like they told me. Can I come now?" },
+        "If Kit leaves the gun, nothing stops the armored cars from catching the convoy. If he stays, he’ll be killed or captured."
       ],
-      prompt: "Give up your place?",
-      dilemma: "Do you owe a stranger your life?",
+      prompt: "Take Kit with you?",
+      dilemma: "Is it right to leave a child to die to save a hundred men?",
       choices: [
         {
-          key: "A",
-          label: "Hold the line",
-          sub: "Obey. Board the ship yourself.",
-          pro: "You escape and live.",
-          con: "Mira is left behind.",
-          icon: "ship",
-          tags: { obey: true, ends: true },
-          beats: [
-            "“I’m sorry.”",
-            { text: "You’re the last one aboard. Mira and her mother disappear into the smoke.", variant: "departing" },
-            "You live. You’ll think about her every day."
-          ],
-          ending: "last_aboard"
-        },
-        {
           key: "B",
-          label: "Give her your place",
-          sub: "Disobey. Put Mira on the ship.",
-          pro: "Mira escapes.",
-          con: "You’re left behind under the shelling.",
+          label: "Take him",
+          sub: "Pull Kit into the truck.",
+          pro: "Kit gets out alive.",
+          con: "Nobody holds the road. The convoy may be caught.",
           icon: "child",
           tags: { obey: false, ends: false },
           beats: [
-            "You lift Mira onto the deck and step back onto the dock.",
-            { text: "The Aurora pulls away. A little girl waves from the rail.", variant: "departing" },
-            { text: "Twenty minutes later, the shells reach the dock.", fx: "barrage" }
+            { text: "You brake hard. Kit scrambles into the cab, shaking.", variant: "taken" },
+            "Behind you, the road goes quiet.",
+            { text: "A kilometer from the harbor, the armored cars catch the convoy.", fx: "shots" },
+            { who: "You", text: "Kit, run for the ships. Don’t look back." },
+            { text: "He runs. You turn the truck across the road to block it.", fx: "barrage" }
           ],
-          ending: "miras_place"
+          ending: "twelve"
+        },
+        {
+          key: "A",
+          label: "Drive on",
+          sub: "Leave Kit at his post.",
+          pro: "The road holds. A hundred men reach the ships.",
+          con: "Kit stays behind, alone.",
+          icon: "truck",
+          tags: { obey: true, ends: true },
+          beats: [
+            { who: "You", text: "Keep firing, Kit. Just a little longer." },
+            { text: "In the mirror, Kit gets smaller. His gun keeps firing.", variant: "leave" },
+            { text: "Every truck reaches the harbor. A hundred wounded men are carried aboard.", scene: "harbor" },
+            { text: "As your ship pulls out at 05:52, the gun on the coast road goes quiet.", variant: "sailing" }
+          ],
+          ending: "the_road"
         }
       ],
       debrief: {
-        concept: "Duty vs. going beyond duty",
-        context: "Evacuations like Dunkirk (1940) and Saigon (1975) forced the same choice about who gets a place.",
+        concept: "Child soldiers & sacrifice",
+        context: "Based on Sidney Lewis, who joined the British Army at 12 and fought as a machine gunner at the Somme in 1916. Today, using children under 15 in combat is a war crime.",
         lenses: {
-          util: { verdict: "A", says: "A soldier can save many more lives later.", text: "A trained soldier can save many more lives in the war to come. Holding the line gives the best overall outcome." },
-          kant: { verdict: "A", says: "Your duty is your post. Sacrifice is optional.", text: "Your duty is to your post. Giving up your life for a stranger is allowed, but not required." },
-          virtue: { verdict: "B", says: "Compassion and courage say: give her your place.", text: "Compassion and courage both point toward giving Mira your place." }
+          util: { verdict: "A", says: "A hundred lives outweigh one, even a child’s.", text: "One boy against a hundred wounded men. It’s painful, but utilitarians count every life equally, so a hundred lives outweigh one, even a child’s." },
+          kant: { verdict: "split", says: "You didn’t put him there, but he can’t consent.", text: "Kantians are divided. Driving on isn’t killing Kit, and you have a duty to the wounded in your truck. But a twelve-year-old can’t truly agree to risk his life, so leaving him at the gun uses him as a tool." },
+          virtue: { verdict: "B", says: "A good person doesn’t leave a child behind.", text: "A good person protects the most vulnerable first, and Kit is a child. Driving on also saves your own life, so it’s hard to be sure it’s duty and not fear." }
         },
-        question: "Can morality demand that you give up your life, or can it only ask?"
+        question: "Adults ordered Kit to hold the road. If he dies there, who is responsible: Kit, his officers, or you for driving past?"
       }
     },
 
-    signal: {
+    /* ───────────────────────── IV (after escaping) ───────────────────────── */
+    cove: {
       chapter: 4,
-      title: "The Signal",
-      place: "Cape Lorn lighthouse",
-      time: "05:22",
-      km: 2,
-      scene: "lighthouse",
-      theme: "Ends vs. means",
+      title: "The Tide",
+      place: "Gull Cove",
+      time: "05:10",
+      km: 3,
+      scene: "cove",
+      theme: "Duty vs. survival",
       beats: [
-        "You reach an empty lighthouse above the harbor. It has a working radio.",
-        "Below you, thousands of people are boarding the last ships.",
-        "Enemy guns on a hill are shelling them. The guns are hidden inside a village full of civilians.",
-        { who: "Allied Command · radio", text: "Anyone out there: give us the location and we’ll bomb those guns." },
-        "If you use the radio, the enemy will track the signal to you."
+        "You’re alone, cut off behind enemy lines, three kilometers from the harbor.",
+        "What’s left of your unit is down at the docks, holding the pier while the last ships load.",
+        { who: "A dead soldier’s radio", text: "…all units… pier four… fall b— …need every man… —ren, do you copy?…" },
+        "Gunfire ahead. Enemy soldiers are on the path between you and the docks.",
+        "Below you, a small fishing boat is tied up in a hidden cove. The tide is going out.",
+        "The tide can only carry it one way: out to sea, to the neutral ships past the cape. Never back to the harbor."
       ],
-      prompt: "Call in the strike?",
-      dilemma: "Is it right to kill innocent people as a side effect of saving more?",
+      prompt: "Take the boat?",
+      dilemma: "Do you owe your unit your life, even if you might not make a difference?",
       choices: [
         {
           key: "A",
-          label: "Call it in",
-          sub: "Radio the location.",
-          pro: "The guns stop. Thousands escape.",
-          con: "The village is destroyed. The enemy will find you.",
-          icon: "radio",
-          tags: { obey: true, ends: true },
+          label: "Take the boat",
+          sub: "Let the tide carry you out to sea.",
+          pro: "You’ll almost certainly live.",
+          con: "You abandon your unit, maybe when they need you most.",
+          icon: "boat",
+          tags: { obey: false, ends: null },
           beats: [
-            "You read out the location twice, the way you were trained.",
-            { text: "The hill turns white. The guns go silent. The ships sail.", fx: "barrage", variant: "strike" },
-            { text: "Then you hear a shell coming for the lighthouse.", fx: "incoming" }
+            { text: "You untie the boat and let the tide take you.", variant: "drift" },
+            "Behind you, the gunfire at the docks goes on for an hour. Then it stops.",
+            { text: "At noon, a neutral fishing ship picks you up. You’re safe.", scene: "survive" },
+            "You never find out what the voice on the radio was trying to say."
           ],
-          ending: "coordinates"
+          ending: "the_tide"
         },
         {
           key: "B",
-          label: "Stay silent",
-          sub: "Say nothing and slip away.",
-          pro: "The village is spared. You get away.",
-          con: "The guns keep firing on the ships.",
-          icon: "radiooff",
-          tags: { obey: false, ends: false },
+          label: "Go back for them",
+          sub: "Fight your way to the docks.",
+          pro: "Your unit gets one more rifle, maybe when it matters most.",
+          con: "You’ll probably be killed on the way.",
+          icon: "unit",
+          tags: { obey: true, ends: null },
           beats: [
-            { text: "You switch off the radio and climb down to a fishing boat.", scene: "survive" },
-            "By sunrise you’re safely out to sea.",
-            "Weeks later you learn that two evacuation ships never left the harbor."
+            { text: "You leave the boat behind and run toward the gunfire.", variant: "gone" },
+            { text: "You come up behind the enemy line. They never see you coming.", fx: "shots" },
+            { text: "Pier four. Your rifle keeps them off the gangway for four minutes. Sixty more people get aboard.", scene: "harbor" },
+            { text: "The last ship pulls away. You are still on the pier.", variant: "departing", fx: "barrage" }
           ],
-          ending: "silent_radio"
+          ending: "pier_four"
         }
       ],
       debrief: {
-        concept: "Side effects & human shields",
-        context: "The laws of war allow strikes on military targets if the harm to civilians isn’t out of proportion.",
+        concept: "Duty vs. self-preservation",
+        context: "In World War I, Britain executed 306 of its own soldiers for desertion and cowardice. Many had shell shock. All were pardoned in 2006.",
         lenses: {
-          util: { verdict: "A", says: "Thousands saved outweighs one village.", text: "Saving thousands of evacuees outweighs the loss of one village. Call the strike." },
-          kant: { verdict: "A", says: "You target the guns. Deaths are a side effect.", text: "The guns are the target. The deaths in the village are a side effect, not your goal. This idea is called the doctrine of double effect." },
-          virtue: { verdict: "A", says: "Courage means risking yourself for others.", text: "Courage means risking yourself for others. Staying silent to save yourself is hard to call brave." }
+          util: { verdict: "A", says: "One rifle probably won’t change much. Stay alive.", text: "You can’t tell if one more rifle would change anything, and you’d probably die getting there. A likely death for an uncertain benefit is a bad trade. Alive, you can still help people later." },
+          kant: { verdict: "B", says: "“Run when it’s dangerous” can’t be a rule for everyone.", text: "Kant’s test: could every soldier follow your rule? If all soldiers ran whenever staying got dangerous, no one could rely on anyone, and your unit is relying on you. Duty means going back." },
+          virtue: { verdict: "B", says: "Courage means facing death for your friends.", text: "For Aristotle, the clearest example of courage is facing death in battle for others. Courage isn’t recklessness, but loyalty to your friends counts for a lot." }
         },
-        question: "The enemy hid its guns among civilians. If those civilians die, who is responsible?"
+        question: "If you can’t know whether your help will make any difference, are you still obligated to try?"
       }
     }
   },
 
   endings: {
     clean_hands: { title: "Clean Hands", survived: false, epitaph: "You refused to kill. Ten died instead of one." },
-    last_aboard: { title: "The Last Aboard", survived: true, epitaph: "You followed your orders, and you lived." },
-    miras_place: { title: "Mira’s Place", survived: false, epitaph: "A six-year-old girl lived because you didn’t." },
-    coordinates: { title: "The Coordinates", survived: false, epitaph: "Thousands escaped. The village and the lighthouse did not." },
-    silent_radio: { title: "The Silent Radio", survived: true, epitaph: "You spared a village and saved yourself. Two ships didn’t make it." }
+    the_road: { title: "The Road Held", survived: true, epitaph: "A hundred men reached the ships because a twelve-year-old held the road." },
+    twelve: { title: "Twelve Years Old", survived: false, epitaph: "Kit made it to the ships. Many of the wounded didn’t, and neither did you." },
+    the_tide: { title: "The Ebb Tide", survived: true, epitaph: "You saved yourself. You’ll never know if they needed you." },
+    pier_four: { title: "Pier Four", survived: false, epitaph: "You went back for them. Sixty people sailed because you did." }
   },
 
   // The ethical profile at the end: which school of thought your choices sit closest to
@@ -526,6 +536,7 @@ window.STORY = {
       <li><strong>The Milgram experiment, 1961–63.</strong> Stanley Milgram found that about 65% of ordinary volunteers would give what they believed was a dangerous 450-volt shock to a stranger because a man in a lab coat told them to. Obedience is much stronger than most of us assume.</li>
       <li><strong>My Lai, 1968.</strong> US Army helicopter pilot Hugh Thompson Jr. landed between American soldiers and Vietnamese villagers during a massacre and ordered his crew to protect the civilians. He was treated as a traitor for years and later awarded the Soldier’s Medal.</li>
       <li><strong>Near misses of World War III.</strong> In 1962, Soviet officer Vasili Arkhipov refused to approve launching a nuclear torpedo during the Cuban Missile Crisis. In 1983, Stanislav Petrov ignored a computer warning of an American missile attack, correctly guessing it was a false alarm. Both men went against procedure, and both may have prevented a nuclear war.</li>
+      <li><strong>Child soldiers, 1916 and today.</strong> Sidney Lewis lied about his age, joined the British Army at 12, and fought as a machine gunner at the Battle of the Somme. Today, using children under 15 in combat is a war crime under the Rome Statute of the International Criminal Court (1998).</li>
     </ul>
 
     <h2>Three ethical perspectives</h2>
@@ -550,8 +561,10 @@ window.STORY = {
       <li>Is there a moral difference between killing someone as a side effect and killing them as a means to an end?</li>
       <li>Should a choice be judged by the chooser’s intentions, by the information they had, or by how it actually turned out?</li>
       <li>Are there acts that are wrong no matter how many lives they would save?</li>
+      <li>Do we owe more to our own family than to strangers?</li>
       <li>If someone else will commit a great evil unless you commit a smaller one, whose fault is the outcome?</li>
-      <li>Can morality require you to give up your life, or is self-sacrifice always beyond duty?</li>
+      <li>Can a child ever agree to risk their life for others? If not, can anyone ask them to?</li>
+      <li>Are you obligated to help when you can’t know whether your help will make any difference?</li>
     </ol>
 
     <h2>Why being good doesn’t keep you alive</h2>
@@ -560,8 +573,9 @@ window.STORY = {
     <h2>My reasoning and conclusions</h2>
     <p>After writing every branch of this game, I don’t think “always obey” or “always follow your conscience” holds up against these dilemmas. Here is where I landed.</p>
     <p><strong>Orders never remove responsibility.</strong> I agree with the Nuremberg principle: if a moral choice is possible, the person who pulls the trigger owns what happens. At the checkpoint, Voss’s order explains why you fired, but it doesn’t make the family’s suffering someone else’s act. Orders still matter, though. A soldier who ignores orders on a hunch puts others at risk. At the bridge, waiting for the refugees cost the lieutenant his life. I think obedience is a real duty, but a limited one, and it ends where an order asks you to deliberately harm innocent people.</p>
-    <p><strong>Ends can justify some means, but not all of them.</strong> I’m persuaded by the idea behind the doctrine of double effect. Blowing a bridge or striking enemy guns, where innocent deaths are a foreseen side effect of stopping a military threat, is different from torturing a prisoner or smothering Tomas, where hurting a person is the tool you use. The first kind can be defended if the good is large enough. The second treats a human being as a thing, and I agree with Kant that numbers can’t erase that line. The colonel’s offer is the hardest case for me. When the old man volunteers and everyone will die anyway, I think taking the pistol respects his choice rather than using him. That is where I part ways with a strict Kantian.</p>
-    <p><strong>Virtue ethics explains what the other two miss:</strong> what these choices do to the person who makes them. The player who holds the gangplank survives, but has to become someone who could do that and live with it.</p>
+    <p><strong>Ends can justify some means, but not all of them.</strong> I’m persuaded by the idea behind the doctrine of double effect. Blowing a bridge, where innocent deaths are a foreseen side effect of stopping a military threat, is different from torturing a prisoner, where hurting a person is the tool you use. The first kind can be defended if the good is large enough. The second treats a human being as a thing, and I agree with Kant that numbers can’t erase that line. The colonel’s offer is a hard case for me. When the old man volunteers and everyone will die anyway, I think taking the pistol respects his choice rather than using him. That is where I part ways with a strict Kantian.</p>
+    <p><strong>The crying baby breaks my own rule.</strong> Smothering Eli uses him as a tool, which I just said numbers can’t justify. But if the patrol finds the cellar, Eli dies anyway, so refusing saves no one and costs five more lives. I can’t call either choice right. I think it is what Rosalind Hursthouse calls a tragic dilemma: there is no right answer, only a choice you have to live with.</p>
+    <p><strong>Virtue ethics explains what the other two miss:</strong> what these choices do to the person who makes them. The player who drives past Kit survives, but has to become someone who could do that and live with it.</p>
     <p><strong>My conclusion.</strong> We should judge choices by the reasons and information a person had at the time, not by how luck turned out. We should hold ourselves responsible for what we do with our own hands, even under orders. And being good is not a strategy for staying alive. If morality only counted when it paid off, it would just be self-interest.</p>
   `
 };
