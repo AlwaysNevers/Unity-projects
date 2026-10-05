@@ -37,8 +37,10 @@
       this.sweep(this.layers.wind.filter.frequency, 380, 160, 0.07);
       // Low rumble of distant war
       this.layers.rumble = this.loop(this.brown, "lowpass", 90, 0.0);
-      // Rain: bandpassed white noise
-      this.layers.rain = this.loop(this.white, "bandpass", 2600, 0.0, 0.6);
+      // Rain: softened white noise. White noise sounds far louder than the
+      // brown-noise layers, so it is trimmed to sit underneath them.
+      this.layers.rain = this.loop(this.white, "lowpass", 1800, 0.0);
+      this.layers.rain.gainLfoTarget.value = 0.09;
       // Sea: slow swelling lowpassed noise
       this.layers.sea = this.loop(this.brown, "lowpass", 600, 0.0);
       this.sweep(this.layers.sea.gainLfoTarget, 0, 1, 0.12, this.layers.sea);

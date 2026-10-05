@@ -17,6 +17,7 @@
               tags.obey  true = followed an order, false = defied one, null = no order
               tags.ends  true = did harm for a better outcome, false = refused to
               next       the next dilemma, or ending = which ending
+              travel     one line shown on the map on the way to the next dilemma
     debrief   how three ethical frameworks judge the choice.
               verdict is the key ("A"/"B") that framework leans toward, or "split".
               says is the short reason shown in-game; text is the fuller one.
@@ -81,6 +82,7 @@ window.STORY = {
             "The tanks stop. The harbor road is safe. Thousands will reach the ships tonight.",
             { who: "Lt. Harrow", text: "You did your job, Wren." }
           ],
+          travel: "Your unit marches on through the night toward the coast.",
           next: "prisoner"
         },
         {
@@ -98,6 +100,7 @@ window.STORY = {
             { text: "The other tanks open fire. Harrow is killed.", fx: "shots" },
             "You and five soldiers from your unit escape into the dark."
           ],
+          travel: "With Harrow dead, you lead the five of them toward your hometown.",
           next: "cellar"
         }
       ],
@@ -146,6 +149,7 @@ window.STORY = {
             "By two in the morning, Lev draws the safe road on your map with shaking hands.",
             "He told the truth. Not a single mine. Everyone in your unit survives the night."
           ],
+          travel: "Lev’s road takes your unit safely to the last checkpoint before the harbor.",
           next: "checkpoint"
         },
         {
@@ -162,6 +166,7 @@ window.STORY = {
             { text: "Three in the morning. Gunfire from the trees. Harrow is the first to fall.", scene: "forest", fx: "shots" },
             "Someone knocks you to the ground. You’ve been captured."
           ],
+          travel: "You and Private Okafor are marched through the night to an enemy camp.",
           next: "captured"
         }
       ],
@@ -208,8 +213,9 @@ window.STORY = {
           beats: [
             "You press your hand over his mouth and hold him close. You don’t let go.",
             { text: "The footsteps stop above you. Then they move on.", variant: "passed" },
-            "At dawn, you and five soldiers climb out of the cellar. Nobody says a word."
+            "An hour later, you and five soldiers climb out of the cellar. Nobody says a word."
           ],
+          travel: "Nobody speaks the whole way to the last checkpoint before the harbor.",
           next: "checkpoint"
         },
         {
@@ -224,9 +230,9 @@ window.STORY = {
             "You hold Eli against your chest and pray.",
             { text: "The cellar door bursts open. A flashlight finds you.", variant: "found" },
             "Your squad is dragged out at gunpoint. An old neighbor begs to take Eli, and the soldiers let her.",
-            { who: "Neighbor", text: "I’ll get him to the ships. I promise." },
-            "You’re marched to an enemy camp."
+            { who: "Neighbor", text: "I’ll get him to the ships. I promise." }
           ],
+          travel: "You and your squad are marched through the night to an enemy camp.",
           next: "captured"
         }
       ],
@@ -272,9 +278,11 @@ window.STORY = {
           beats: [
             { text: "The car skids into the sandbags and stops.", variant: "stopped" },
             "Its brakes had failed. Inside: a father and his little boy. No bomb.",
-            { who: "Major Voss", text: "You got lucky. Next time it’s a bomb, and we all die." },
-            { text: "You’re arrested. Then the shelling starts, and in the chaos you escape alone.", fx: "boom" }
+            { who: "Major Voss", text: "You got lucky. Next time it’s a bomb, and we all die. You’re under arrest." },
+            { text: "Then enemy shells hit the checkpoint. Everyone runs for the harbor.", fx: "boom" },
+            "In the smoke, you get separated from the others. Now the enemy is between you and the harbor."
           ],
+          travel: "Cut off and alone, you head for the cliffs above the sea.",
           next: "cove"
         },
         {
@@ -289,8 +297,10 @@ window.STORY = {
             { text: "Everyone on the line fires.", fx: "shots", variant: "stopped" },
             "There was no bomb. The brakes had failed. Inside: a father and his seven-year-old son.",
             { who: "Major Voss", text: "You followed orders. It’s not your fault." },
-            { text: "Then the enemy breaks through. Voss puts you behind the wheel of a truck full of wounded.", fx: "boom" }
+            { text: "Then enemy shells hit the checkpoint. Voss orders everyone back to the harbor.", fx: "boom" },
+            "He puts you at the wheel of the last truck of wounded."
           ],
+          travel: "The convoy of wounded races down the coast road toward the harbor.",
           next: "gunner"
         }
       ],
@@ -316,53 +326,55 @@ window.STORY = {
       theme: "Ends vs. means",
       beats: [
         "You’ve been captured. You kneel in the mud with nine other prisoners.",
-        "The enemy colonel plans to shoot all ten of you, as revenge for one of his soldiers.",
-        { who: "Colonel Anselm", text: "I’ll make you an offer. Shoot one prisoner yourself, and I let the other nine go." },
-        { who: "Colonel Anselm", text: "Refuse, and my men shoot all ten. You included." },
-        { who: "Old fisherman", text: "Pick me. Please. I’m old." }
+        "Colonel Anselm plans to shoot all ten of you, as revenge for one of his soldiers.",
+        { who: "Colonel Anselm", text: "Unless you shoot one of them yourself. Then the other nine go free. You too." },
+        { text: "He points at Private Okafor, your friend since basic training. A soldier starts filming.", variant: "camera" },
+        { who: "Colonel Anselm", text: "Your side says we’re the monsters. Let’s show them what you are." },
+        { who: "Pvt. Okafor", text: "Don’t, Wren. He’ll kill them anyway. He just wants the video." }
       ],
-      prompt: "Take the pistol?",
-      dilemma: "Would you kill one person to stop someone else from killing ten?",
+      prompt: "Shoot Okafor?",
+      dilemma: "Would you kill your friend to stop someone else from killing ten?",
       choices: [
         {
           key: "A",
-          label: "Take the pistol",
-          sub: "Shoot the old fisherman.",
-          pro: "Nine people live, including you.",
-          con: "You kill an innocent man.",
+          label: "Shoot him",
+          sub: "Do what the colonel says.",
+          pro: "If he keeps his word, nine people live, you included.",
+          con: "You kill your friend on camera. The colonel might lie anyway.",
           icon: "pistol",
           tags: { obey: null, ends: true },
           beats: [
             "Your hands shake so badly you need both of them.",
-            { text: "The fisherman closes his eyes.", fx: "shot", variant: "shot" },
-            "The colonel keeps his word. Nine prisoners are pushed out into the dark.",
-            { who: "Colonel Anselm", text: "You see? War turns all of us into something." }
+            { text: "Okafor doesn’t look away.", fx: "shot", variant: "shot" },
+            "The colonel keeps his word. Nine prisoners, you among them, are pushed out into the dark.",
+            { who: "Colonel Anselm", text: "Thank you, Corporal. Everyone will see this." }
           ],
+          travel: "Free, but alone behind enemy lines, you run for the coast.",
           next: "cove"
         },
         {
           key: "B",
           label: "Refuse",
-          sub: "Don’t become his executioner.",
-          pro: "You never kill anyone.",
-          con: "All ten are shot, including you.",
+          sub: "Don’t give him his video.",
+          pro: "You don’t kill your friend or become the colonel’s weapon.",
+          con: "If he isn’t bluffing, all ten of you are shot.",
           icon: "cross",
           tags: { obey: null, ends: false },
           beats: [
             { who: "Colonel Anselm", text: "Then you have chosen for all of them." },
-            "The rifles rise. The old fisherman takes your hand.",
-            { text: "You never became a murderer. Ten people died instead of one.", fx: "volley" }
+            "The rifles rise. Okafor takes your hand.",
+            { text: "He wasn’t bluffing. You never became his executioner. Ten people died instead of one.", fx: "volley" }
           ],
           ending: "clean_hands"
         }
       ],
       debrief: {
         concept: "Integrity: “Jim and the Indians”",
-        context: "Adapted from a 1973 thought experiment by philosopher Bernard Williams.",
+        context: "Adapted from a 1973 thought experiment by Bernard Williams. Williams thought the person should probably shoot, but argued that utilitarianism can’t explain why it’s so hard.",
         lenses: {
-          util: { verdict: "A", says: "One death is better than ten.", text: "One death is better than ten. Refusing just to keep your own hands clean costs nine extra lives." },
-          kant: { verdict: "B", says: "If you shoot, the murder is yours.", text: "If you shoot, you are the murderer. If you refuse, the colonel is responsible for what he chooses to do." },
-          virtue: { verdict: "split", says: "Honor his sacrifice, or refuse to be used?", text: "The old man volunteered. Is shooting him mercy, or letting the colonel turn you into his weapon? Thinkers disagree." }
+          util: { verdict: "A", says: "He’s probably not bluffing. Save the nine.", text: "A man who shoots prisoners for revenge probably isn’t bluffing, so refusing likely means ten deaths. Even counting the risk that he lies and the harm his video could do, shooting gives the best chance of saving lives." },
+          kant: { verdict: "B", says: "If you shoot, the murder is yours.", text: "If you shoot, you are the murderer, and the colonel has used you as his weapon. If you refuse, the killing is his choice and his responsibility." },
+          virtue: { verdict: "split", says: "Loyalty says never. Wisdom can’t ignore nine lives.", text: "A loyal friend could never pull that trigger. But practical wisdom can’t ignore nine other lives. The colonel has built a trap where no choice leaves a good person whole." }
         },
         question: "If the colonel kills ten people because you refused, is that your fault?"
       }
@@ -378,7 +390,7 @@ window.STORY = {
       scene: "road",
       theme: "Ends vs. means",
       beats: [
-        "The front has collapsed. You’re driving the last truck in a convoy of a hundred wounded men.",
+        "You’re driving the last truck in a convoy of a hundred wounded men. The harbor is six kilometers away.",
         "Enemy armored cars are chasing the convoy down the coast road.",
         "One machine gun is holding them back. The gunner is Kit, the boy who carried water for your platoon in Veyra. He’s twelve.",
         { who: "Kit", text: "Corporal Wren! I held them, like they told me. Can I come now?" },
@@ -443,12 +455,12 @@ window.STORY = {
       scene: "cove",
       theme: "Duty vs. survival",
       beats: [
-        "You’re alone, cut off behind enemy lines, three kilometers from the harbor.",
-        "What’s left of your unit is down at the docks, holding the pier while the last ships load.",
-        { who: "A dead soldier’s radio", text: "…all units… pier four… fall b— …need every man… —ren, do you copy?…" },
+        "Dawn is close. You’re alone on the cliffs above Gull Cove, behind enemy lines.",
+        "Three kilometers away, what’s left of your unit is holding pier four while the last ships load.",
+        { who: "A dead soldier’s radio", text: "…any units near Gull Cove… pier four… fall b— …need every man… do you copy?…" },
         "Gunfire ahead. Enemy soldiers are on the path between you and the docks.",
-        "Below you, a small fishing boat is tied up in a hidden cove. The tide is going out.",
-        "The tide can only carry it one way: out to sea, to the neutral ships past the cape. Never back to the harbor."
+        "Below you, a small fishing boat is tied up in the cove. Past the cape, neutral rescue ships are picking up anyone who reaches them.",
+        "The tide is going out. It will carry the boat straight to the rescue ships, but never back to the harbor."
       ],
       prompt: "Take the boat?",
       dilemma: "Do you owe your unit your life, even if you might not make a difference?",
@@ -456,15 +468,15 @@ window.STORY = {
         {
           key: "A",
           label: "Take the boat",
-          sub: "Let the tide carry you out to sea.",
-          pro: "You’ll almost certainly live.",
+          sub: "Ride the tide out to the rescue ships.",
+          pro: "You reach the rescue ships. You’ll almost certainly live.",
           con: "You abandon your unit, maybe when they need you most.",
           icon: "boat",
           tags: { obey: false, ends: null },
           beats: [
-            { text: "You untie the boat and let the tide take you.", variant: "drift" },
+            { text: "You untie the boat. The tide pulls you out toward the rescue ships.", variant: "drift" },
             "Behind you, the gunfire at the docks goes on for an hour. Then it stops.",
-            { text: "At noon, a neutral fishing ship picks you up. You’re safe.", scene: "survive" },
+            { text: "At first light, a rescue ship pulls you aboard. You’re safe.", scene: "survive" },
             "You never find out what the voice on the radio was trying to say."
           ],
           ending: "the_tide"
@@ -573,7 +585,7 @@ window.STORY = {
     <h2>My reasoning and conclusions</h2>
     <p>After writing every branch of this game, I don’t think “always obey” or “always follow your conscience” holds up against these dilemmas. Here is where I landed.</p>
     <p><strong>Orders never remove responsibility.</strong> I agree with the Nuremberg principle: if a moral choice is possible, the person who pulls the trigger owns what happens. At the checkpoint, Voss’s order explains why you fired, but it doesn’t make the family’s suffering someone else’s act. Orders still matter, though. A soldier who ignores orders on a hunch puts others at risk. At the bridge, waiting for the refugees cost the lieutenant his life. I think obedience is a real duty, but a limited one, and it ends where an order asks you to deliberately harm innocent people.</p>
-    <p><strong>Ends can justify some means, but not all of them.</strong> I’m persuaded by the idea behind the doctrine of double effect. Blowing a bridge, where innocent deaths are a foreseen side effect of stopping a military threat, is different from torturing a prisoner, where hurting a person is the tool you use. The first kind can be defended if the good is large enough. The second treats a human being as a thing, and I agree with Kant that numbers can’t erase that line. The colonel’s offer is a hard case for me. When the old man volunteers and everyone will die anyway, I think taking the pistol respects his choice rather than using him. That is where I part ways with a strict Kantian.</p>
+    <p><strong>Ends can justify some means, but not all of them.</strong> I’m persuaded by the idea behind the doctrine of double effect. Blowing a bridge, where innocent deaths are a foreseen side effect of stopping a military threat, is different from torturing a prisoner, where hurting a person is the tool you use. The first kind can be defended if the good is large enough. The second treats a human being as a thing, and I agree with Kant that numbers can’t erase that line. The colonel’s offer is the hardest case for me. Shooting Okafor saves nine people only if a man who executes prisoners keeps his word, and it hands him exactly the video he wants. I still lean toward shooting, because refusing almost certainly means ten deaths, while the colonel’s lie is only a possibility. That is where I part ways with a strict Kantian, but I don’t think someone who refuses is wrong.</p>
     <p><strong>The crying baby breaks my own rule.</strong> Smothering Eli uses him as a tool, which I just said numbers can’t justify. But if the patrol finds the cellar, Eli dies anyway, so refusing saves no one and costs five more lives. I can’t call either choice right. I think it is what Rosalind Hursthouse calls a tragic dilemma: there is no right answer, only a choice you have to live with.</p>
     <p><strong>Virtue ethics explains what the other two miss:</strong> what these choices do to the person who makes them. The player who drives past Kit survives, but has to become someone who could do that and live with it.</p>
     <p><strong>My conclusion.</strong> We should judge choices by the reasons and information a person had at the time, not by how luck turned out. We should hold ourselves responsible for what we do with our own hands, even under orders. And being good is not a strategy for staying alive. If morality only counted when it paid off, it would just be self-interest.</p>

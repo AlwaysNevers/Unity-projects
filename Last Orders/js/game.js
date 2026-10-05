@@ -164,7 +164,7 @@
       caption.hidden = false;
       caption.classList.remove("ready");
       whoEl.textContent = beat.who || "";
-      lineEl.classList.toggle("quote", !!beat.who);
+      lineEl.classList.toggle("quote", !!beat.who && !beat.plain);
       const shown = el("span");
       const ghost = el("span", "ghost", beat.text);
       lineEl.replaceChildren(shown, ghost);
@@ -259,7 +259,7 @@
   }
 
   /* ───────── travel on the map ───────── */
-  async function travel(from, to, id) {
+  async function travel(from, to, id, line) {
     const node = S.nodes[to];
     const fromCh = from === "veyra" ? 0 : S.nodes[from].chapter;
     cinema(true);
@@ -269,8 +269,9 @@
     if (id !== runId) return false;
     hudTime(node.time);
     hudKm(node.km);
-    await say({ who: "En route", text: `${node.place} · ${node.time}` });
-    await waitAdvance(3200);
+    if (line) await say({ who: `En route · ${S.places[to].name} · ${node.time}`, text: line, plain: true });
+    else await say({ who: "En route", text: `${node.place} · ${node.time}` });
+    await waitAdvance(line ? 3800 : 3200);
     caption.hidden = true;
     return id === runId;
   }
@@ -301,7 +302,7 @@
     if (id !== runId) return;
 
     if (choice.ending) return showEnding(choice.ending);
-    if (!(await travel(nodeId, choice.next, id))) return;
+    if (!(await travel(nodeId, choice.next, id, choice.travel))) return;
     return playNode(choice.next, id);
   }
 

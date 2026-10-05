@@ -78,10 +78,17 @@
       ctx.fill();
       head(ctx, h * 0.06, -h * 0.47, r * 1.05, false);
     } else if (pose === "lie") {
+      // fallen on the ground, head toward the facing side
+      ctx.lineWidth = limb * 1.1;
+      line(ctx, -h * 0.02, -h * 0.06, -h * 0.44, -h * 0.04); // straight leg
+      line(ctx, -h * 0.02, -h * 0.06, -h * 0.22, -h * 0.17); // bent leg
+      line(ctx, -h * 0.22, -h * 0.17, -h * 0.38, -h * 0.05);
       ctx.beginPath();
-      ctx.ellipse(0, -h * 0.07, h * 0.45, h * 0.075, 0, 0, TAU);
+      ctx.ellipse(h * 0.15, -h * 0.08, h * 0.2, h * 0.08, -0.06, 0, TAU);
       ctx.fill();
-      head(ctx, h * 0.5, -h * 0.1, r, false);
+      head(ctx, h * 0.42, -h * 0.08, r, o.helmet);
+      ctx.lineWidth = limb * 0.8;
+      line(ctx, h * 0.24, -h * 0.12, h * 0.33, -h * 0.01); // arm
     } else {
       // stand / walk
       const walk = pose === "walk";
@@ -663,7 +670,7 @@
       weather: "drizzle",
       flashes: 0.2,
       searchlights: 1,
-      audio: { wind: 0.3, rumble: 0.3, rain: 0.2, drone: 0.08 },
+      audio: { wind: 0.3, rumble: 0.3, rain: 0.3, drone: 0.08 },
       draw(ctx, t, S) {
         // horizon hills
         ctx.fillStyle = "#0b1016";
@@ -751,58 +758,89 @@
 
     camp: {
       sky: ["#040507", "#0a0d11", "#141a20"],
-      horizon: 0.7,
+      horizon: 0.58,
       glow: null,
       weather: "drizzle",
       flashes: 0.15,
-      audio: { wind: 0.3, rumble: 0.25, rain: 0.18, drone: 0.1 },
+      audio: { wind: 0.3, rumble: 0.25, rain: 0.28, drone: 0.1 },
       draw(ctx, t, S) {
+        const v = S.opts.variant || "";
+        const filming = v === "camera" || v === "shot";
+        const shot = v === "shot" && S.st > 0.15;
+        const F = 450; // where the prisoners kneel
         // tents & trucks far
         ctx.fillStyle = "#0b0e12";
         for (let i = -6; i < 16; i++) {
           const x = i * 110 + (i % 3) * 20;
           ctx.beginPath();
-          ctx.moveTo(x, 440);
-          ctx.lineTo(x + 45, 400);
-          ctx.lineTo(x + 90, 440);
+          ctx.moveTo(x, 350);
+          ctx.lineTo(x + 45, 312);
+          ctx.lineTo(x + 90, 350);
           ctx.fill();
         }
-        ctx.fillRect(-2000, 438, 5000, 200);
+        ctx.fillRect(-2000, 348, 5000, 300);
         // floodlights
-        [[150, 250], [850, 250]].forEach(([x, y], i) => {
+        [[90, 170], [960, 170]].forEach(([x, y], i) => {
           ctx.fillStyle = INK;
           ctx.fillRect(x - 3, y, 6, 300);
           ctx.fillRect(x - 16, y - 6, 32, 10);
           const flick = 0.9 + 0.1 * Math.sin(t * 20 + i * 3);
           ctx.globalCompositeOperation = "lighter";
-          lightCone(ctx, x, y, i ? 2.2 : 0.94, 520, 0.28, "rgba(235,240,255,A)", 0.24 * flick);
+          lightCone(ctx, x, y, i ? 2.3 : 0.84, 560, 0.28, "rgba(235,240,255,A)", 0.24 * flick);
           glow(ctx, x, y, 50, "rgba(255,255,240,A)", 0.9);
           ctx.globalCompositeOperation = "source-over";
         });
         // lit mud pool
-        const g = ctx.createRadialGradient(500, 540, 10, 500, 540, 380);
+        const g = ctx.createRadialGradient(480, F, 10, 480, F, 380);
         g.addColorStop(0, "rgba(160,170,185,0.25)");
         g.addColorStop(1, "rgba(160,170,185,0)");
         ctx.fillStyle = g;
-        ctx.fillRect(100, 450, 800, 150);
-        // kneeling prisoners
-        for (let i = 0; i < 10; i++) {
-          if (i === 5 && S.opts.variant === "shot" && S.st > 0.15) continue;
-          const x = 250 + i * 52;
-          person(ctx, x, 540, 72, { pose: "kneel", arms: "behind", facing: -1, helmet: i % 3 === 0, lean: 0.12 - (i === 4 ? 0.06 : 0) });
+        ctx.fillRect(100, 370, 800, 150);
+        // the other eight prisoners, kneeling in a row behind
+        [235, 305, 375, 445, 545, 615, 685, 755].forEach((x, i) => {
+          person(ctx, x, 404, 62, { pose: "kneel", arms: "behind", facing: 1, helmet: i % 3 === 0, lean: 0.16 });
+        });
+        person(ctx, 175, 406, 92, { helmet: true, rifle: "shoulder", facing: 1 });
+        person(ctx, 885, 406, 92, { helmet: true, rifle: "shoulder", facing: -1 });
+        // the camera's lamp, picking out you and Okafor
+        if (filming) {
+          ctx.globalCompositeOperation = "lighter";
+          lightCone(ctx, 738, 384, 3.02, 470, 0.13, "rgba(230,235,255,A)", 0.26);
+          ctx.globalCompositeOperation = "source-over";
         }
-        // the colonel, offering the pistol to you (5th in line)
-        person(ctx, 520, 540, 104, { cap: true, arms: "out", facing: -1 });
-        // guards
-        person(ctx, 180, 540, 100, { helmet: true, rifle: "shoulder", facing: 1 });
-        person(ctx, 830, 540, 100, { helmet: true, rifle: "shoulder", facing: -1 });
+        // Okafor, beside you
+        if (shot) person(ctx, 392, F, 88, { pose: "lie", facing: -1, helmet: true });
+        else person(ctx, 400, F, 92, { pose: "kneel", arms: "behind", facing: 1, helmet: true, lean: 0.04 });
+        // you: facing the colonel, then turned toward Okafor with the pistol
+        if (v === "shot") person(ctx, 482, F, 94, { pose: "kneel", arms: "forward", facing: -1, lean: 0.06 });
+        else person(ctx, 482, F, 94, { pose: "kneel", arms: "behind", facing: 1, lean: 0.1 });
+        // the colonel, holding out the pistol to you
+        person(ctx, 566, F + 2, 128, { cap: true, arms: v === "shot" ? null : "out", facing: -1 });
+        // the camera on its tripod, and the soldier filming
+        if (filming) {
+          ctx.fillStyle = INK;
+          ctx.strokeStyle = INK;
+          ctx.lineWidth = 3.5;
+          line(ctx, 764, 388, 738, F + 2);
+          line(ctx, 764, 388, 790, F + 2);
+          line(ctx, 764, 388, 764, F + 2);
+          ctx.beginPath();
+          roundRect(ctx, 742, 368, 42, 24, 3);
+          ctx.fill();
+          ctx.fillRect(733, 373, 12, 14);
+          person(ctx, 816, F + 2, 124, { helmet: true, facing: -1, lean: 0.12 });
+          ctx.globalCompositeOperation = "lighter";
+          glow(ctx, 735, 380, 20, "rgba(235,240,255,A)", 0.9);
+          if (Math.sin(t * 4) > 0) glow(ctx, 776, 364, 10, "rgba(255,40,30,A)", 1);
+          ctx.globalCompositeOperation = "source-over";
+        }
         // barbed wire fence foreground
         ctx.fillStyle = INK;
-        for (let x = -1500; x < 2500; x += 150) ctx.fillRect(x, 470, 6, 140);
+        for (let x = -1500; x < 2500; x += 150) ctx.fillRect(x, 476, 6, 140);
         for (let x = -1500; x < 2500; x += 150) {
-          wire(ctx, x, x + 150, 490, 10, "#050608");
-          wire(ctx, x, x + 150, 530, 8, "#050608");
-          wire(ctx, x, x + 150, 570, 6, "#050608");
+          wire(ctx, x, x + 150, 494, 10, "#050608");
+          wire(ctx, x, x + 150, 534, 8, "#050608");
+          wire(ctx, x, x + 150, 574, 6, "#050608");
         }
         ctx.fillStyle = INK;
         ctx.fillRect(-2000, 588, 5000, 40);
@@ -1108,16 +1146,34 @@
           line(ctx, x, y, x + 9, y - 2);
         }
         ctx.globalCompositeOperation = "source-over";
-        // neutral ships waiting past the cape, lights on
-        const nx = 905;
-        ctx.fillStyle = "#1a1828";
-        ctx.fillRect(nx - 50, 294, 100, 8);
-        ctx.fillRect(nx - 20, 284, 40, 10);
-        ctx.fillRect(nx - 3, 268, 3, 16);
-        ctx.fillStyle = "rgba(200,240,210,0.9)";
-        ctx.fillRect(nx - 3, 266, 3, 3);
-        ctx.fillStyle = "rgba(255,230,170,0.6)";
-        for (let i = 0; i < 6; i++) ctx.fillRect(nx - 40 + i * 15, 297, 2, 2);
+        // neutral rescue ships waiting past the cape, lit up so no one shells them
+        const nx = 785,
+          ny = 300;
+        ctx.globalCompositeOperation = "lighter";
+        glow(ctx, nx, ny - 12, 120, "rgba(170,190,255,A)", 0.16);
+        const sweep = Math.PI - 0.22 + Math.sin(t * 0.35) * 0.16;
+        lightCone(ctx, nx - 8, ny - 30, sweep, 420, 0.035, "rgba(225,235,255,A)", 0.2);
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "rgba(185,190,205,0.4)";
+        ctx.fillRect(nx + 74, ny - 5, 40, 4);
+        ctx.fillRect(nx + 88, ny - 10, 12, 5);
+        ctx.fillStyle = "#c4c7d0";
+        ctx.beginPath();
+        ctx.moveTo(nx - 62, ny - 11);
+        ctx.lineTo(nx + 60, ny - 11);
+        ctx.lineTo(nx + 52, ny);
+        ctx.lineTo(nx - 56, ny);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillRect(nx - 26, ny - 22, 46, 11);
+        ctx.fillRect(nx - 10, ny - 30, 14, 8);
+        ctx.fillStyle = "#3f7d55";
+        ctx.fillRect(nx - 58, ny - 5, 112, 2);
+        ctx.fillStyle = "#d33a2c";
+        [[nx - 3, ny - 16.5, 2], [nx - 38, ny - 8, 1.6], [nx + 34, ny - 8, 1.6]].forEach(([cx, cy, k]) => {
+          ctx.fillRect(cx - k / 2, cy - k * 1.5, k, k * 3);
+          ctx.fillRect(cx - k * 1.5, cy - k / 2, k * 3, k);
+        });
         // the ebb tide: streaks drifting out to sea
         for (let i = 0; i < 52; i++) {
           const y = 312 + i * 4.8;
@@ -1168,9 +1224,9 @@
         [490, 535, 580, 628].forEach((x) => ctx.fillRect(x, 412, 6, 40));
         // the boat, bobbing on the tide
         const bob = Math.sin(t * 1.4) * 2.2;
-        const bx = lerp(700, 960, drift),
-          by = lerp(426, 350, drift) + bob * (1 - drift * 0.6);
-        const bs = lerp(1, 0.42, drift);
+        const bx = lerp(700, 752, drift),
+          by = lerp(426, 322, drift) + bob * (1 - drift * 0.7);
+        const bs = lerp(1, 0.3, drift);
         if (!drift) {
           ctx.strokeStyle = INK;
           ctx.lineWidth = 1.6;
@@ -1416,7 +1472,7 @@
       ctx.setLineDash([]);
       ctx.fillStyle = "rgba(240,110,80,0.85)";
       ctx.font = mono(10);
-      ctx.fillText("ENEMY ADVANCE \u25B6", fx - 128, 575);
+      ctx.fillText("ENEMY ADVANCE \u25B6", fx - 128, 82);
       // Veyra burns
       ctx.globalCompositeOperation = "lighter";
       glow(ctx, P.veyra.x, P.veyra.y, 70, "rgba(255,110,40,A)", 0.45 + 0.15 * Math.sin(t * 3));
@@ -1497,7 +1553,7 @@
     weather: "drizzle",
     flashes: 0,
     focal: { x: 500, y: 460 },
-    audio: { wind: 0.3, rumble: 0.2, rain: 0.2, drone: 0.1 },
+    audio: { wind: 0.3, rumble: 0.2, rain: 0.3, drone: 0.1 },
     draw(ctx, t, S) {
       const back = S.cached("fo-back", () => Array.from({ length: 16 }, (_, i) => makeTree(100 + i, -400 + i * 110 + (i % 3) * 25, 470, 60 + ((i * 37) % 40))));
       back.forEach((tr) => drawTree(ctx, tr, "#10171c", Math.sin(t) * 1.5));
@@ -1531,10 +1587,10 @@
   Object.assign(SCENES.farmhouse, { focal: { x: 450, y: 420 } });
   Object.assign(SCENES.cellar, { focal: { x: 470, y: 420 } });
   Object.assign(SCENES.checkpoint, { focal: { x: 500, y: 460 } });
-  Object.assign(SCENES.camp, { focal: { x: 500, y: 480 } });
+  Object.assign(SCENES.camp, { focal: { x: 500, y: 400 }, shot: [458, 418] });
   Object.assign(SCENES.harbor, { focal: { x: 450, y: 420 }, barrageZone: [-250, 350, 440] });
   Object.assign(SCENES.road, { focal: { x: 500, y: 430 }, pfocus: 500, barrageZone: [100, 900, 430] });
-  Object.assign(SCENES.cove, { focal: { x: 500, y: 380 }, pfocus: 500 });
+  Object.assign(SCENES.cove, { focal: { x: 540, y: 380 }, pfocus: 560 });
 
   function tank(ctx, x, y, s, color) {
     ctx.save();
@@ -1712,7 +1768,8 @@
         this.whiteout(0.75);
       } else if (name === "shots") this.muzzle();
       else if (name === "shot") {
-        this.flashes.push({ x: 520, y: 480, life: 0, max: 0.25, big: 0.5, near: true });
+        const [x, y] = d.shot || [520, 480];
+        this.flashes.push({ x, y, life: 0, max: 0.25, big: 0.5, near: true });
         this.whiteout(0.3);
         this.shakeAmt = 6;
         if (A) A.shots(1);
