@@ -582,7 +582,7 @@
     // header
     const head = el("header", "r-head");
     const hl = el("div");
-    hl.append(el("p", "dispatch", "After-action report · Cpl. Wren"), el("h1", null, e.title), el("p", "epi", e.epitaph));
+    hl.append(el("p", "dispatch", "After-action report · Cpl. Tow"), el("h1", null, e.title), el("p", "epi", e.epitaph));
     const luck = el("p", "luck");
     luck.innerHTML = e.survived
       ? "<b>Moral luck:</b> you survived, but that doesn’t mean you chose right. In this game, staying alive is never the reward for being good."

@@ -6,7 +6,7 @@
   <title>Last Orders</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800;900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;800;900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Special+Elite&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-screen="title">
@@ -27,15 +27,36 @@
   </header>
 
   <section id="title" class="title" aria-labelledby="logo">
-    <p class="dispatch">Transmission · 14 November 2031 · 21:40</p>
-    <h1 class="logo" id="logo">Last<br><span>Orders</span></h1>
-    <p class="tagline">One night. Four decisions. The last ship leaves at dawn.</p>
-    <div class="actions">
-      <button class="btn primary" id="begin" type="button">Play</button>
-      <button class="btn" id="notesBtn" type="button">Designer’s Notes</button>
-    </div>
-    <p class="meta">An ethics game about obedience, conscience, and whether the ends justify the means. About 6 minutes. Sound on.</p>
-    <p class="meta" id="found"></p>
+    <article class="order">
+      <header class="order-head">
+        <span>Field order</span>
+        <span>No. 1187</span>
+      </header>
+      <dl class="order-to">
+        <div><dt>Date</dt><dd>14 Nov 2031, 21:40</dd></div>
+        <div><dt>To</dt><dd>Cpl. Tow</dd></div>
+        <div><dt>From</dt><dd>Lt. Harrow, your commanding officer</dd></div>
+      </dl>
+      <ol class="order-body">
+        <li>The front has collapsed. Veyra is lost.</li>
+        <li>Withdraw with your unit to Saltmarsh Harbor, 40&nbsp;km away.</li>
+        <li>The last ship leaves at 06:00.</li>
+        <li>Obey all orders without question.</li>
+      </ol>
+      <h1 class="order-stamp" id="logo">Last Orders</h1>
+      <div class="order-actions">
+        <button class="btn primary" id="begin" type="button">Begin</button>
+        <button class="btn" id="notesBtn" type="button">Designer’s notes</button>
+      </div>
+      <p class="order-foot" id="found"></p>
+    </article>
+    <p class="meta">An ethics game about obedience, conscience, and whether the ends justify the means. About 6 minutes, with sound.</p>
+    <svg class="defs" aria-hidden="true" width="0" height="0">
+      <filter id="inked">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" />
+      </filter>
+    </svg>
   </section>
 
   <div id="card" class="card" hidden></div>

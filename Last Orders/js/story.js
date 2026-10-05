@@ -30,7 +30,7 @@ window.STORY = {
   opening: [
     { big: "November 2031", small: "The Third World War is eleven weeks old." },
     { big: "The front has collapsed", small: "The city of Veyra is burning.", fx: "boom" },
-    { big: "You are Corporal Wren", small: "22 years old. Eight months in uniform." },
+    { big: "You are Corporal Tow", small: "22 years old. Eight months in uniform." },
     { big: "The last ship leaves at dawn", small: "Saltmarsh Harbor. 40 kilometers away." },
     { big: "Four choices", small: "Doing the right thing will not always keep you alive." }
   ],
@@ -63,7 +63,8 @@ window.STORY = {
         "Your unit has wired it with explosives. You’re holding the detonator.",
         "Enemy tanks are coming. If they cross, thousands of people fleeing to the harbor will be trapped.",
         "But forty refugees are still on the bridge. They need about three more minutes to get across.",
-        { who: "Lt. Harrow · radio", text: "Wren, blow the bridge. That’s an order. Now." }
+        { text: "Behind you, your commanding officer, Lieutenant Harrow, lowers his radio.", variant: "harrow" },
+        { who: "Lt. Harrow · your commander", text: "Tow, blow the bridge. That’s an order. Now." }
       ],
       prompt: "Blow the bridge?",
       dilemma: "Should you obey an order that kills innocent people?",
@@ -80,7 +81,7 @@ window.STORY = {
             { text: "Your thumb comes down.", fx: "explosion", variant: "blown" },
             "The middle of the bridge falls into the river. Everyone on it goes with it.",
             "The tanks stop. The harbor road is safe. Thousands will reach the ships tonight.",
-            { who: "Lt. Harrow", text: "You did your job, Wren." }
+            { who: "Lt. Harrow", text: "You did your job, Tow." }
           ],
           travel: "Your unit marches on through the night toward the coast.",
           next: "prisoner"
@@ -100,7 +101,7 @@ window.STORY = {
             { text: "The other tanks open fire. Harrow is killed.", fx: "shots" },
             "You and five soldiers from your unit escape into the dark."
           ],
-          travel: "With Harrow dead, you lead the five of them toward your hometown.",
+          travel: "With Harrow dead, you lead the five survivors to your hometown, where your baby son is.",
           next: "cellar"
         }
       ],
@@ -186,17 +187,16 @@ window.STORY = {
     cellar: {
       chapter: 2,
       title: "The Cellar",
-      place: "Your mother’s house, Ostrava",
+      place: "Your hometown, Ostrava",
       time: "00:40",
       km: 33,
       scene: "cellar",
       theme: "Ends vs. means",
       beats: [
-        "Ostrava, your hometown. Your mother has been looking after your baby son here since the war began.",
-        "She’s gone. But Eli is here, asleep in a drawer by the stove. He’s two months old.",
-        "An enemy patrol turns into the street. You and your five soldiers hide in the cellar, Eli in your arms.",
+        "Ostrava, your hometown. You’ve come back for your two-month-old son, Eli, to take him to the ships.",
+        "An enemy patrol turns into the street. You hide in a cellar with Eli and your five soldiers.",
         "It’s hot and airless down here. Eli wakes up and starts to scream. Nothing you do calms him.",
-        { who: "Pvt. Okafor", text: "Wren, keep him quiet. If they hear him, they’ll kill all of us. Him too." },
+        { who: "Pvt. Okafor", text: "Tow, keep him quiet. If they hear him, they’ll kill all of us. Him too." },
         "Boots cross the floor above you. The only way to silence him now is to smother him."
       ],
       prompt: "Silence your son?",
@@ -262,7 +262,7 @@ window.STORY = {
         "Enemies have been driving car bombs into checkpoints. The order: if a car won’t stop, shoot.",
         "A car is speeding toward you. You fire a warning shot. It doesn’t stop.",
         "You can see a shape in the back seat. Maybe a child. Maybe a bomb.",
-        { who: "Major Voss", text: "Fire! Fire, Wren!" }
+        { who: "Major Voss", text: "Fire! Fire, Tow!" }
       ],
       prompt: "Open fire?",
       dilemma: "Should you follow an order when you can’t be sure it’s right?",
@@ -330,7 +330,7 @@ window.STORY = {
         { who: "Colonel Anselm", text: "Unless you shoot one of them yourself. Then the other nine go free. You too." },
         { text: "He points at Private Okafor, your friend since basic training. A soldier starts filming.", variant: "camera" },
         { who: "Colonel Anselm", text: "Your side says we’re the monsters. Let’s show them what you are." },
-        { who: "Pvt. Okafor", text: "Don’t, Wren. He’ll kill them anyway. He just wants the video." }
+        { who: "Pvt. Okafor", text: "Don’t, Tow. He’ll kill them anyway. He just wants the video." }
       ],
       prompt: "Shoot Okafor?",
       dilemma: "Would you kill your friend to stop someone else from killing ten?",
@@ -393,7 +393,7 @@ window.STORY = {
         "You’re driving the last truck in a convoy of a hundred wounded men. The harbor is six kilometers away.",
         "Enemy armored cars are chasing the convoy down the coast road.",
         "One machine gun is holding them back. The gunner is Kit, the boy who carried water for your platoon in Veyra. He’s twelve.",
-        { who: "Kit", text: "Corporal Wren! I held them, like they told me. Can I come now?" },
+        { who: "Kit", text: "Corporal Tow! I held them, like they told me. Can I come now?" },
         "If Kit leaves the gun, nothing stops the armored cars from catching the convoy. If he stays, he’ll be killed or captured."
       ],
       prompt: "Take Kit with you?",

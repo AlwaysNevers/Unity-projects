@@ -484,7 +484,27 @@
         ctx.quadraticCurveTo(760, 500, 700, 380);
         ctx.stroke();
         // Harrow with the radio, behind you
-        if (v !== "blowntank") person(ctx, 930, 452, 104, { helmet: true, rifle: "sling", facing: -1 });
+        if (v !== "blowntank") person(ctx, 905, 452, 104, { helmet: true, rifle: "sling", facing: -1 });
+        // name him with a callout the moment he's introduced (gone once the decision zooms in)
+        if (v === "harrow" && !S.pushed) {
+          const px = 1 / (S.scale * S.cam.z);
+          const a = Math.min(1, S.st / 0.5);
+          const top = 452 - 104 - 10;
+          const ty = top - 34 * px - 30;
+          ctx.save();
+          ctx.globalAlpha = a;
+          ctx.strokeStyle = "rgba(233,162,59,0.85)";
+          ctx.lineWidth = 1.5 * px;
+          line(ctx, 905, top, 905, ty + 8 * px);
+          ctx.textAlign = "right";
+          ctx.fillStyle = "#e9a23b";
+          ctx.font = `500 ${15 * px}px "IBM Plex Mono", ui-monospace, monospace`;
+          ctx.fillText("LT. HARROW", 905 + 4 * px, ty - 16 * px);
+          ctx.fillStyle = "rgba(230,224,211,0.85)";
+          ctx.font = `${11 * px}px "IBM Plex Mono", ui-monospace, monospace`;
+          ctx.fillText("YOUR COMMANDING OFFICER", 905 + 4 * px, ty);
+          ctx.restore();
+        }
         // after waiting, the refugees are safe on your bank
         if (crossing || v === "blowntank") {
           const R = rng(55);
@@ -1583,7 +1603,7 @@
 
   // Camera focal points, portrait framing and blast positions per scene
   Object.assign(SCENES.title, { focal: { x: 620, y: 440 } });
-  Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 560, blast: [520, 372] });
+  Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 625, blast: [520, 372] });
   Object.assign(SCENES.farmhouse, { focal: { x: 450, y: 420 } });
   Object.assign(SCENES.cellar, { focal: { x: 470, y: 420 } });
   Object.assign(SCENES.checkpoint, { focal: { x: 500, y: 460 } });

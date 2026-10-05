@@ -1,6 +1,6 @@
 # Last Orders
 
-An interactive ethics game for a philosophy project. You play Corporal Wren, a soldier trying to reach the last evacuation ship on the first night of a third world war. Along the way you face four moral dilemmas about **obeying orders vs. following your conscience** and **whether the ends justify the means**.
+An interactive ethics game for a philosophy project. You play Corporal Tow, a soldier trying to reach the last evacuation ship on the first night of a third world war. Along the way you face four moral dilemmas about **obeying orders vs. following your conscience** and **whether the ends justify the means**.
 
 ## How to play
 
