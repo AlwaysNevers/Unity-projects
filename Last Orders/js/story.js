@@ -109,7 +109,7 @@ window.STORY = {
         context: "Real history: in 1950, Seoul’s Hangang Bridge was blown up while refugees were crossing it.",
         lenses: {
           util: { verdict: "A", says: "40 deaths to save thousands is worth it.", text: "Utilitarians judge by results. Forty deaths to save thousands is the better outcome, so blow the bridge." },
-          kant: { verdict: "B", says: "Killing innocents is wrong, even under orders.", text: "Kant says killing innocent people is wrong no matter the result. Being ordered to doesn’t make it someone else’s choice." },
+          kant: { verdict: "B", says: "Killing innocents is wrong, even under orders.", text: "Deontology says killing innocent people is wrong no matter the result. Being ordered to doesn’t make it someone else’s choice." },
           virtue: { verdict: "split", says: "Brave duty, or cold obedience? It depends.", text: "Aristotle would ask what a brave and wise person would do. Is pressing the button courage or cold obedience? Thinkers disagree." }
         },
         question: "If you only pressed the button because you were ordered to, who is responsible for the deaths: you, Harrow, or the enemy?"
@@ -175,7 +175,7 @@ window.STORY = {
         context: "Torture is banned by the Geneva Conventions, even in war and even under orders.",
         lenses: {
           util: { verdict: "A", says: "If it saves forty soldiers, the pain is worth it.", text: "If torturing one person saves forty soldiers, the result is worth it. (Many utilitarians still worry that torture produces false information.)" },
-          kant: { verdict: "B", says: "Torture uses a person as a tool. Never OK.", text: "Torturing someone uses them purely as a tool to get what you want. Kant says that is always wrong, whatever it achieves." },
+          kant: { verdict: "B", says: "Torture uses a person as a tool. Never OK.", text: "Torturing someone uses them purely as a tool to get what you want. Deontology says that is always wrong, whatever it achieves." },
           virtue: { verdict: "B", says: "Cruelty damages the person who does it.", text: "A good person is merciful. Torture turns you into someone cruel, even if it works." }
         },
         question: "You didn’t know the torture would work. Should a choice be judged by what you knew at the time, or by how it turned out?"
@@ -309,7 +309,7 @@ window.STORY = {
         context: "At the Nuremberg trials (1945–46), “I was just following orders” was rejected as a defense.",
         lenses: {
           util: { verdict: "A", says: "A real bomb risk justifies firing.", text: "There was a real chance of a bomb. Firing protected the most people, based on what you knew." },
-          kant: { verdict: "split", says: "Your intention matters, not how it turned out.", text: "Kant judges your intention, not the result. Kantians disagree about whether “shoot any car that won’t stop” is a fair rule." },
+          kant: { verdict: "split", says: "Your intention matters, not how it turned out.", text: "Deontology judges your intention, not the result. Deontologists disagree about whether “shoot any car that won’t stop” is a fair rule." },
           virtue: { verdict: "B", says: "A good soldier thinks, not just obeys.", text: "A good soldier uses judgment, not just orders. In 1983, Soviet officer Stanislav Petrov trusted his judgment and ignored a false nuclear alarm." }
         },
         question: "If the car had held a bomb, would holding fire have been the wrong choice?"
@@ -438,7 +438,7 @@ window.STORY = {
         context: "Based on Sidney Lewis, who joined the British Army at 12 and fought as a machine gunner at the Somme in 1916. Today, using children under 15 in combat is a war crime.",
         lenses: {
           util: { verdict: "A", says: "A hundred lives outweigh one, even a child’s.", text: "One boy against a hundred wounded men. It’s painful, but utilitarians count every life equally, so a hundred lives outweigh one, even a child’s." },
-          kant: { verdict: "split", says: "You didn’t put him there, but he can’t consent.", text: "Kantians are divided. Driving on isn’t killing Kit, and you have a duty to the wounded in your truck. But a twelve-year-old can’t truly agree to risk his life, so leaving him at the gun uses him as a tool." },
+          kant: { verdict: "split", says: "You didn’t put him there, but he can’t consent.", text: "Deontologists are divided. Driving on isn’t killing Kit, and you have a duty to the wounded in your truck. But a twelve-year-old can’t truly agree to risk his life, so leaving him at the gun uses him as a tool." },
           virtue: { verdict: "B", says: "A good person doesn’t leave a child behind.", text: "A good person protects the most vulnerable first, and Kit is a child. Driving on also saves your own life, so it’s hard to be sure it’s duty and not fear." }
         },
         question: "Adults ordered Kit to hold the road. If he dies there, who is responsible: Kit, his officers, or you for driving past?"
@@ -503,7 +503,7 @@ window.STORY = {
         context: "In World War I, Britain executed 306 of its own soldiers for desertion and cowardice. Many had shell shock. All were pardoned in 2006.",
         lenses: {
           util: { verdict: "A", says: "One rifle probably won’t change much. Stay alive.", text: "You can’t tell if one more rifle would change anything, and you’d probably die getting there. A likely death for an uncertain benefit is a bad trade. Alive, you can still help people later." },
-          kant: { verdict: "B", says: "“Run when it’s dangerous” can’t be a rule for everyone.", text: "Kant’s test: could every soldier follow your rule? If all soldiers ran whenever staying got dangerous, no one could rely on anyone, and your unit is relying on you. Duty means going back." },
+          kant: { verdict: "B", says: "“Run when it’s dangerous” can’t be a rule for everyone.", text: "Deontology’s test: could every soldier follow your rule? If all soldiers ran whenever staying got dangerous, no one could rely on anyone, and your unit is relying on you. Duty means going back." },
           virtue: { verdict: "B", says: "Courage means facing death for your friends.", text: "For Aristotle, the clearest example of courage is facing death in battle for others. Courage isn’t recklessness, but loyalty to your friends counts for a lot." }
         },
         question: "If you can’t know whether your help will make any difference, are you still obligated to try?"
@@ -522,12 +522,12 @@ window.STORY = {
   // The ethical profile at the end: which school of thought your choices sit closest to
   frameworks: {
     util: { name: "Utilitarianism", short: "Utilitarian", who: "Bentham · Mill", motto: "Best result for the most people" },
-    kant: { name: "Kantian ethics", short: "Kantian", who: "Immanuel Kant", motto: "Some acts are always wrong" },
+    kant: { name: "Deontology", short: "Deontology", who: "Immanuel Kant", motto: "Some acts are always wrong" },
     virtue: { name: "Virtue ethics", short: "Virtue ethics", who: "Aristotle", motto: "What would a good person do?" }
   },
   profiles: {
     util: { label: "a Utilitarian", text: "You judged choices by their results. When harm bought a better outcome, you paid the price." },
-    kant: { label: "a Kantian", text: "Some lines you would not cross, whatever the orders or the numbers." },
+    kant: { label: "a Deontologist", text: "Some lines you would not cross, whatever the orders or the numbers." },
     virtue: { label: "a Virtue Ethicist", text: "You chose with compassion and courage, and asked what each choice would make you." },
     plural: { label: "a Pluralist", text: "Your choices don’t fit one theory. Many philosophers think that’s the honest position." }
   },
@@ -585,7 +585,7 @@ window.STORY = {
     <h2>My reasoning and conclusions</h2>
     <p>After writing every branch of this game, I don’t think “always obey” or “always follow your conscience” holds up against these dilemmas. Here is where I landed.</p>
     <p><strong>Orders never remove responsibility.</strong> I agree with the Nuremberg principle: if a moral choice is possible, the person who pulls the trigger owns what happens. At the checkpoint, Voss’s order explains why you fired, but it doesn’t make the family’s suffering someone else’s act. Orders still matter, though. A soldier who ignores orders on a hunch puts others at risk. At the bridge, waiting for the refugees cost the lieutenant his life. I think obedience is a real duty, but a limited one, and it ends where an order asks you to deliberately harm innocent people.</p>
-    <p><strong>Ends can justify some means, but not all of them.</strong> I’m persuaded by the idea behind the doctrine of double effect. Blowing a bridge, where innocent deaths are a foreseen side effect of stopping a military threat, is different from torturing a prisoner, where hurting a person is the tool you use. The first kind can be defended if the good is large enough. The second treats a human being as a thing, and I agree with Kant that numbers can’t erase that line. The colonel’s offer is the hardest case for me. Shooting Okafor saves nine people only if a man who executes prisoners keeps his word, and it hands him exactly the video he wants. I still lean toward shooting, because refusing almost certainly means ten deaths, while the colonel’s lie is only a possibility. That is where I part ways with a strict Kantian, but I don’t think someone who refuses is wrong.</p>
+    <p><strong>Ends can justify some means, but not all of them.</strong> I’m persuaded by the idea behind the doctrine of double effect. Blowing a bridge, where innocent deaths are a foreseen side effect of stopping a military threat, is different from torturing a prisoner, where hurting a person is the tool you use. The first kind can be defended if the good is large enough. The second treats a human being as a thing, and I agree with deontologists that numbers can’t erase that line. The colonel’s offer is the hardest case for me. Shooting Okafor saves nine people only if a man who executes prisoners keeps his word, and it hands him exactly the video he wants. I still lean toward shooting, because refusing almost certainly means ten deaths, while the colonel’s lie is only a possibility. That is where I part ways with a strict deontologist, but I don’t think someone who refuses is wrong.</p>
     <p><strong>The crying baby breaks my own rule.</strong> Smothering Eli uses him as a tool, which I just said numbers can’t justify. But if the patrol finds the cellar, Eli dies anyway, so refusing saves no one and costs five more lives. I can’t call either choice right. I think it is what Rosalind Hursthouse calls a tragic dilemma: there is no right answer, only a choice you have to live with.</p>
     <p><strong>Virtue ethics explains what the other two miss:</strong> what these choices do to the person who makes them. The player who drives past Kit survives, but has to become someone who could do that and live with it.</p>
     <p><strong>My conclusion.</strong> We should judge choices by the reasons and information a person had at the time, not by how luck turned out. We should hold ourselves responsible for what we do with our own hands, even under orders. And being good is not a strategy for staying alive. If morality only counted when it paid off, it would just be self-interest.</p>

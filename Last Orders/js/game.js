@@ -11,7 +11,7 @@
   const FW = ["util", "kant", "virtue"];
   const ENDING_ORDER = ["the_road", "the_tide", "twelve", "pier_four", "clean_hands"];
   const HOLD_MS = 900;
-  const CHIP = { util: "Util", kant: "Kant", virtue: "Virtue" };
+  const CHIP = { util: "Util", kant: "Deontology", virtue: "Virtue" };
   const DECIDE_MS = 20000;
 
   /* ───────── icons (24×24 line drawings) ───────── */
