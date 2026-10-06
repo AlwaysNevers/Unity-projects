@@ -469,39 +469,94 @@
           }
           bus(ctx, 400 + Math.min(S.st * 2.5, 110), deckY);
         }
-        // near bank: the road comes off the bridge onto land, where you kneel with the detonator
-        ctx.fillStyle = INK;
+        // near bank (middle distance): the bridge lands on an embankment and the road ramps down.
+        // It faces the burning city and catches its light, so the dark foreground stands out against it.
+        const bankY = (x) => (x <= 830 ? 372 + (x - 790) / 20 : x <= 960 ? 374 + ((x - 830) / 130) * 20 : 394);
+        const nb = ctx.createLinearGradient(0, 368, 0, 560);
+        nb.addColorStop(0, "#3a2017");
+        nb.addColorStop(0.45, "#25140f");
+        nb.addColorStop(1, "#140c0a");
+        ctx.fillStyle = nb;
         ctx.beginPath();
-        ctx.moveTo(680, 620);
-        ctx.lineTo(730, 470);
-        ctx.quadraticCurveTo(762, 400, 786, 381);
-        ctx.lineTo(790, 372);
-        ctx.quadraticCurveTo(1200, 366, 2600, 380);
+        ctx.moveTo(560, 620);
+        ctx.lineTo(752, 410);
+        ctx.quadraticCurveTo(772, 392, 790, 372);
+        ctx.lineTo(830, 374);
+        ctx.quadraticCurveTo(880, 392, 960, 394);
+        ctx.lineTo(2600, 398);
         ctx.lineTo(2600, 620);
         ctx.fill();
-        person(ctx, 850, 373, 96, { pose: "kneel", helmet: true, arms: "forward", facing: -1 });
-        ctx.fillRect(812, 357, 22, 16);
-        ctx.strokeStyle = INK;
-        ctx.lineWidth = 1.4;
+        // firelight glints along the water's edge
+        ctx.strokeStyle = "rgba(255,140,70,0.28)";
+        ctx.lineWidth = 1.5;
+        line(ctx, 752, 410, 560, 620);
+        // your unit at the bridgehead, at the same scale as the people on the bridge
+        if (v !== "blowntank") {
+          person(ctx, 968, bankY(968), 27, { helmet: true, rifle: "sling", facing: -1, color: "#0c0909" });
+          person(ctx, 1004, bankY(1004), 26, { helmet: true, facing: -1, color: "#0c0909" });
+        }
+        // after waiting, the refugees are safe on your bank
+        if (crossing || v === "blowntank") {
+          const R = rng(55);
+          for (let i = 0; i < 12; i++) {
+            const x = i % 2 ? 796 + R() * 26 : 905 + R() * 120;
+            person(ctx, x, bankY(x) + R() * 2, 22 + R() * 7, { facing: -1, bulky: R() > 0.6, color: "#0c0909" });
+          }
+        }
+        // you, crouched behind sandbags, rim-lit by the burning city, with a radio pack
+        const you = { pose: "kneel", helmet: true, arms: "forward", facing: -1 };
+        person(ctx, 847.5, 533, 200, { ...you, color: "rgba(255,130,60,0.22)" });
+        person(ctx, 850, 533, 200, you);
+        ctx.fillStyle = INK;
         ctx.beginPath();
-        ctx.moveTo(818, 371);
-        ctx.quadraticCurveTo(770, 425, 720, 381);
-        ctx.stroke();
-        // the field radio beside you: Harrow gives his orders from headquarters
-        ctx.fillRect(884, 358, 20, 15);
+        roundRect(ctx, 860, 406, 28, 54, 5);
+        ctx.fill();
+        ctx.strokeStyle = INK;
+        ctx.lineWidth = 2;
+        line(ctx, 882, 408, 896, 326);
+        // the sandbag wall hides your legs and sits between you and the river
+        for (let r = 0; r < 4; r++) {
+          for (let x = 744 + (r % 2) * 22 - r * 8; x < 1070 + r * 12; x += 44) {
+            ctx.fillStyle = INK;
+            ctx.strokeStyle = "#150d0b";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            roundRect(ctx, x, 458 + r * 19, 46, 23, 10);
+            ctx.fill();
+            ctx.stroke();
+          }
+        }
+        // foreground: the ground right in front of the camera, hiding your feet
+        ctx.fillStyle = INK;
+        ctx.beginPath();
+        ctx.moveTo(590, 620);
+        ctx.quadraticCurveTo(650, 552, 740, 534);
+        ctx.quadraticCurveTo(820, 520, 960, 524);
+        ctx.lineTo(2600, 530);
+        ctx.lineTo(2600, 620);
+        ctx.fill();
+        // the detonator sits on the sandbags, its cable running back to the bridge
+        ctx.fillStyle = INK;
+        ctx.fillRect(782, 440, 28, 19);
+        ctx.fillRect(794, 432, 4, 9);
+        ctx.strokeStyle = INK;
         ctx.lineWidth = 1.6;
-        line(ctx, 900, 358, 910, 300);
-        if (!crossing && v !== "blowntank") glow(ctx, 889, 364, 7, "rgba(233,162,59,A)", 0.9);
+        ctx.beginPath();
+        ctx.moveTo(784, 452);
+        ctx.quadraticCurveTo(742, 440, 786, 384);
+        ctx.stroke();
+        if (!crossing && v !== "blowntank") glow(ctx, 868, 418, 8, "rgba(233,162,59,A)", 0.9);
+        // Harrow's voice comes in over the radio
         if (v === "radio") {
           for (let k = 0; k < 3; k++) {
             const ph = (S.st * 0.9 + k / 3) % 1;
             ctx.strokeStyle = `rgba(233,162,59,${(1 - ph) * 0.75})`;
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(910, 300, 6 + ph * 28, -0.8, 0.8);
+            ctx.arc(896, 326, 6 + ph * 28, -0.8, 0.8);
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc(910, 300, 6 + ph * 28, Math.PI - 0.8, Math.PI + 0.8);
+            ctx.arc(896, 326, 6 + ph * 28, Math.PI - 0.8, Math.PI + 0.8);
             ctx.stroke();
           }
         }
@@ -509,26 +564,21 @@
         if (v === "radio" && !S.pushed) {
           const px = 1 / (S.scale * S.cam.z);
           const a = Math.min(1, S.st / 0.5);
-          const top = 260;
+          const top = 286;
           const ty = top - 34 * px;
           ctx.save();
           ctx.globalAlpha = a;
           ctx.strokeStyle = "rgba(233,162,59,0.85)";
           ctx.lineWidth = 1.5 * px;
-          line(ctx, 910, top, 910, ty + 8 * px);
+          line(ctx, 896, top, 896, ty + 8 * px);
           ctx.textAlign = "right";
           ctx.fillStyle = "#e9a23b";
           ctx.font = `500 ${15 * px}px "IBM Plex Mono", ui-monospace, monospace`;
-          ctx.fillText("LT. HARROW", 910 + 4 * px, ty - 16 * px);
+          ctx.fillText("LT. HARROW", 896 + 4 * px, ty - 16 * px);
           ctx.fillStyle = "rgba(230,224,211,0.85)";
           ctx.font = `${11 * px}px "IBM Plex Mono", ui-monospace, monospace`;
-          ctx.fillText("YOUR COMMANDER · ON THE RADIO", 910 + 4 * px, ty);
+          ctx.fillText("YOUR COMMANDER · ON THE RADIO", 896 + 4 * px, ty);
           ctx.restore();
-        }
-        // after waiting, the refugees are safe on your bank
-        if (crossing || v === "blowntank") {
-          const R = rng(55);
-          for (let i = 0; i < 12; i++) person(ctx, i % 2 ? 794 + R() * 30 : 925 + R() * 70, 372 + R() * 3, 24 + R() * 8, { facing: -1, bulky: R() > 0.6, color: "#0b0909" });
         }
       }
     },
@@ -1623,7 +1673,7 @@
 
   // Camera focal points, portrait framing and blast positions per scene
   Object.assign(SCENES.title, { focal: { x: 620, y: 440 } });
-  Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 610, blast: [520, 372] });
+  Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 620, blast: [520, 372] });
   Object.assign(SCENES.farmhouse, { focal: { x: 450, y: 420 } });
   Object.assign(SCENES.cellar, { focal: { x: 470, y: 420 } });
   Object.assign(SCENES.checkpoint, { focal: { x: 500, y: 460 } });
