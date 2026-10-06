@@ -31,8 +31,7 @@ window.STORY = {
     { big: "November 2031", small: "The Third World War is eleven weeks old." },
     { big: "The front has collapsed", small: "The city of Veyra is burning.", fx: "boom" },
     { big: "You are Corporal Tow", small: "22 years old. Eight months in uniform." },
-    { big: "The last ship leaves at dawn", small: "Saltmarsh Harbor. 40 kilometers away." },
-    { big: "Four choices", small: "Doing the right thing will not always keep you alive." }
+    { big: "The last ship leaves at dawn", small: "Saltmarsh Harbor. 40 kilometers away." }
   ],
 
   // Positions on the tactical map (virtual 1000 x 600 stage)
@@ -63,8 +62,8 @@ window.STORY = {
         "Your unit has wired it with explosives. You’re holding the detonator.",
         "Enemy tanks are coming. If they cross, thousands of people fleeing to the harbor will be trapped.",
         "But forty refugees are still on the bridge. They need about three more minutes to get across.",
-        { text: "Behind you, your commanding officer, Lieutenant Harrow, lowers his radio.", variant: "harrow" },
-        { who: "Lt. Harrow · your commander", text: "Tow, blow the bridge. That’s an order. Now." }
+        { text: "Your radio crackles. It’s your commanding officer, Lieutenant Harrow, at headquarters.", variant: "radio" },
+        { who: "Lt. Harrow · on the radio", text: "Tow, blow the bridge. That’s an order. Now." }
       ],
       prompt: "Blow the bridge?",
       dilemma: "Should you obey an order that kills innocent people?",
@@ -81,7 +80,7 @@ window.STORY = {
             { text: "Your thumb comes down.", fx: "explosion", variant: "blown" },
             "The middle of the bridge falls into the river. Everyone on it goes with it.",
             "The tanks stop. The harbor road is safe. Thousands will reach the ships tonight.",
-            { who: "Lt. Harrow", text: "You did your job, Tow." }
+            { who: "Lt. Harrow · on the radio", text: "You did your job, Tow." }
           ],
           travel: "Your unit marches on through the night toward the coast.",
           next: "prisoner"
@@ -98,10 +97,10 @@ window.STORY = {
             { text: "You switch off the radio and wait.", variant: "crossing" },
             "The last family reaches your side. Then the first tank rolls onto the bridge.",
             { text: "You press the button. The tank goes down with the bridge.", fx: "explosion", variant: "blowntank" },
-            { text: "The other tanks open fire. Harrow is killed.", fx: "shots" },
+            { text: "The other tanks open fire across the river. Most of your unit is killed.", fx: "shots" },
             "You and five soldiers from your unit escape into the dark."
           ],
-          travel: "With Harrow dead, you lead the five survivors to your hometown, where your baby son is.",
+          travel: "Cut off from Harrow, you lead the five survivors to your hometown, where your baby son is.",
           next: "cellar"
         }
       ],
@@ -131,8 +130,8 @@ window.STORY = {
         "You’ve captured an enemy scout. His name is Lev Arkin. He’s nineteen.",
         "He knows which roads to the coast are free of mines.",
         "Without that, your unit has to go through the Tannen forest, which is full of enemy patrols.",
-        { who: "Lt. Harrow", text: "Make him tell you the safe road. Whatever it takes." },
-        "Harrow hands you a pair of pliers. Lev starts to cry."
+        { who: "Lt. Harrow · on the radio", text: "Make him tell you the safe road. Whatever it takes." },
+        "There’s a pair of pliers on the table. Lev sees them and starts to cry."
       ],
       prompt: "Torture him?",
       dilemma: "Is torture ever acceptable if it could save lives?",
@@ -162,9 +161,9 @@ window.STORY = {
           icon: "shield",
           tags: { obey: false, ends: false },
           beats: [
-            "You put the pliers down and give Lev some water.",
+            "You push the pliers away and give Lev some water.",
             "Without the safe road, your unit goes through the forest.",
-            { text: "Three in the morning. Gunfire from the trees. Harrow is the first to fall.", scene: "forest", fx: "shots" },
+            { text: "Three in the morning. Gunfire from the trees. Half your unit falls in the first minute.", scene: "forest", fx: "shots" },
             "Someone knocks you to the ground. You’ve been captured."
           ],
           travel: "You and Private Okafor are marched through the night to an enemy camp.",
@@ -532,62 +531,26 @@ window.STORY = {
     plural: { label: "a Pluralist", text: "Your choices don’t fit one theory. Many philosophers think that’s the honest position." }
   },
 
-  /* The Designer's Notes page. This is where the assignment's
-     "explain your own reasoning and conclusions" lives.
-     EDIT THE "MY REASONING AND CONCLUSIONS" SECTION IN YOUR OWN WORDS. */
+  /* The Designer's Notes page. "My analysis" and "My conclusion" are your
+     own reasoning, so rewrite them in your own words. */
   notes: `
-    <p class="lede">Last Orders is a choose-your-own-adventure game about two old questions that a third world war would make urgent again: <strong>When should a soldier refuse an order?</strong> and <strong>Can a good outcome justify a terrible act?</strong></p>
+    <p class="lede">Last Orders is about two questions. When should a soldier refuse an order? And can a good result make a terrible act OK?</p>
+    <p>An army only works if soldiers follow orders. But some of the worst crimes in history were done by people who said they were “just following orders.” In the game you play a soldier trying to reach the last ship out, and every choice puts these two ideas against each other. The right choice doesn’t always keep you alive.</p>
 
-    <h2>The ethical issue</h2>
-    <p>Every army depends on obedience. A soldier who second-guesses every order puts comrades at risk, and a chain of command exists so that no single frightened person has to carry every decision. But history is full of atrocities carried out by people who were only following orders, and full of disasters prevented by people who refused.</p>
-    <p>The second question sits underneath the first. Most orders in war ask a soldier to cause harm for the sake of a larger good: stop the tanks, get the information, protect the checkpoint. The trolley problem asks whether it is right to kill one person to save five. War asks it every night, with real people on the tracks.</p>
-
-    <h2>Context: this has really happened</h2>
-    <ul>
-      <li><strong>Nuremberg, 1945–46.</strong> After World War II, the Allied tribunal rejected “superior orders” as a defense. Nuremberg Principle IV states that following orders does not relieve a person of responsibility “provided a moral choice was in fact possible to him.”</li>
-      <li><strong>The Milgram experiment, 1961–63.</strong> Stanley Milgram found that about 65% of ordinary volunteers would give what they believed was a dangerous 450-volt shock to a stranger because a man in a lab coat told them to. Obedience is much stronger than most of us assume.</li>
-      <li><strong>My Lai, 1968.</strong> US Army helicopter pilot Hugh Thompson Jr. landed between American soldiers and Vietnamese villagers during a massacre and ordered his crew to protect the civilians. He was treated as a traitor for years and later awarded the Soldier’s Medal.</li>
-      <li><strong>Near misses of World War III.</strong> In 1962, Soviet officer Vasili Arkhipov refused to approve launching a nuclear torpedo during the Cuban Missile Crisis. In 1983, Stanislav Petrov ignored a computer warning of an American missile attack, correctly guessing it was a false alarm. Both men went against procedure, and both may have prevented a nuclear war.</li>
-      <li><strong>Child soldiers, 1916 and today.</strong> Sidney Lewis lied about his age, joined the British Army at 12, and fought as a machine gunner at the Battle of the Somme. Today, using children under 15 in combat is a war crime under the Rome Statute of the International Criminal Court (1998).</li>
-    </ul>
-
-    <h2>Three ethical perspectives</h2>
+    <h2>Three ways to judge a choice</h2>
     <dl class="frameworks">
-      <div>
-        <dt>Utilitarianism</dt>
-        <dd><em>Jeremy Bentham, John Stuart Mill.</em> The right act is the one that produces the best overall consequences, usually the most well-being for the most people. Orders matter only if obeying them leads to better results. Any act, even a terrible one, can be justified if the outcome is good enough.</dd>
-      </div>
-      <div>
-        <dt>Deontology</dt>
-        <dd><em>Immanuel Kant.</em> Some acts are right or wrong in themselves, whatever the consequences. Kant’s Categorical Imperative says to act only on rules you could will everyone to follow, and to treat people always as ends in themselves, never merely as means. Duty here means the moral law, not obedience to a commander.</dd>
-      </div>
-      <div>
-        <dt>Virtue ethics</dt>
-        <dd><em>Aristotle.</em> Instead of asking “What rule applies?” or “What outcome is best?”, ask “What would a good person do, and what kind of person does this choice make me?” Virtues like courage, compassion, and loyalty are found in the balance between extremes, and practical wisdom (<em>phronesis</em>) is the skill of seeing what a situation really calls for.</dd>
-      </div>
+      <div><dt>Utilitarianism</dt><dd>Bentham and Mill. Pick whatever leads to the best result for the most people.</dd></div>
+      <div><dt>Deontology</dt><dd>Kant. Some things are wrong no matter the result, like using a person as a tool.</dd></div>
+      <div><dt>Virtue ethics</dt><dd>Aristotle. Do what a good person would do, and think about what the choice turns you into.</dd></div>
     </dl>
 
-    <h2>Questions the game asks</h2>
-    <ol>
-      <li>Does following an order move moral responsibility to the person who gave it?</li>
-      <li>Is there a moral difference between killing someone as a side effect and killing them as a means to an end?</li>
-      <li>Should a choice be judged by the chooser’s intentions, by the information they had, or by how it actually turned out?</li>
-      <li>Are there acts that are wrong no matter how many lives they would save?</li>
-      <li>Do we owe more to our own family than to strangers?</li>
-      <li>If someone else will commit a great evil unless you commit a smaller one, whose fault is the outcome?</li>
-      <li>Can a child ever agree to risk their life for others? If not, can anyone ask them to?</li>
-      <li>Are you obligated to help when you can’t know whether your help will make any difference?</li>
-    </ol>
+    <h2>My analysis</h2>
+    <p>I don’t think following orders makes you innocent. After World War II, the Nuremberg trials rejected “I was following orders” as a defense, and I agree with that. If you blow the bridge, those deaths are partly on you, even though Harrow told you to. But I also don’t think soldiers should ignore orders whenever they disagree. Harrow can see more of the battle than Tow can, and an army where everyone does their own thing gets people killed. So I think you should usually obey, but not when the order is to do something that’s wrong in itself, like torture.</p>
+    <p>That’s why I treat the bridge and the prisoner differently, even though both trade harm for safety. At the bridge, the refugees die as a side effect of stopping the tanks. Nobody wants them dead. With Lev, hurting him is the whole plan. That’s using a person as a tool, which Kant says is always wrong. So I think blowing the bridge can be justified, but torturing Lev can’t, even though it works in the game.</p>
+    <p>The colonel’s offer and the crying baby were the hardest for me. In both, the person you’d have to kill will probably die anyway. The colonel will shoot Okafor whether you help or not, and the patrol will likely kill Eli if they find the cellar. I would shoot Okafor, because refusing almost certainly gets all ten killed. That’s where I disagree with deontology. With Eli I can’t decide. The numbers say the same thing, but he’s your own child, and a parent’s duty to protect him feels like it should count for more. Philosopher Rosalind Hursthouse calls this a tragic dilemma: whatever you choose, you have to live with it.</p>
+    <p>I also think luck shouldn’t decide whether you were right. At the checkpoint the car never has a bomb, so firing always looks wrong afterwards. But Tow couldn’t know that. A choice should be judged by what you knew when you made it. That’s also why good choices in the game sometimes get you killed. Real life doesn’t always reward people for doing the right thing, so the game doesn’t either.</p>
 
-    <h2>Why being good doesn’t keep you alive</h2>
-    <p>I deliberately disconnected survival from morality. In this game, defying an unjust order can get you killed, and doing something terrible can get you home. Philosophers Bernard Williams and Thomas Nagel called this <strong>moral luck</strong>: the outcome of a choice often depends on things outside our control, yet we judge people by outcomes anyway. If the game rewarded every good choice with survival, it would teach the comforting lie that morality always pays. The dilemmas only work if doing right might cost you everything.</p>
-
-    <h2>My reasoning and conclusions</h2>
-    <p>After writing every branch of this game, I don’t think “always obey” or “always follow your conscience” holds up against these dilemmas. Here is where I landed.</p>
-    <p><strong>Orders never remove responsibility.</strong> I agree with the Nuremberg principle: if a moral choice is possible, the person who pulls the trigger owns what happens. At the checkpoint, Voss’s order explains why you fired, but it doesn’t make the family’s suffering someone else’s act. Orders still matter, though. A soldier who ignores orders on a hunch puts others at risk. At the bridge, waiting for the refugees cost the lieutenant his life. I think obedience is a real duty, but a limited one, and it ends where an order asks you to deliberately harm innocent people.</p>
-    <p><strong>Ends can justify some means, but not all of them.</strong> I’m persuaded by the idea behind the doctrine of double effect. Blowing a bridge, where innocent deaths are a foreseen side effect of stopping a military threat, is different from torturing a prisoner, where hurting a person is the tool you use. The first kind can be defended if the good is large enough. The second treats a human being as a thing, and I agree with deontologists that numbers can’t erase that line. The colonel’s offer is the hardest case for me. Shooting Okafor saves nine people only if a man who executes prisoners keeps his word, and it hands him exactly the video he wants. I still lean toward shooting, because refusing almost certainly means ten deaths, while the colonel’s lie is only a possibility. That is where I part ways with a strict deontologist, but I don’t think someone who refuses is wrong.</p>
-    <p><strong>The crying baby breaks my own rule.</strong> Smothering Eli uses him as a tool, which I just said numbers can’t justify. But if the patrol finds the cellar, Eli dies anyway, so refusing saves no one and costs five more lives. I can’t call either choice right. I think it is what Rosalind Hursthouse calls a tragic dilemma: there is no right answer, only a choice you have to live with.</p>
-    <p><strong>Virtue ethics explains what the other two miss:</strong> what these choices do to the person who makes them. The player who drives past Kit survives, but has to become someone who could do that and live with it.</p>
-    <p><strong>My conclusion.</strong> We should judge choices by the reasons and information a person had at the time, not by how luck turned out. We should hold ourselves responsible for what we do with our own hands, even under orders. And being good is not a strategy for staying alive. If morality only counted when it paid off, it would just be self-interest.</p>
+    <h2>My conclusion</h2>
+    <p>No single theory worked for every dilemma. Utilitarianism would let you do anything if the numbers were big enough, including torture. Deontology can make you let ten people die to keep your own hands clean. Virtue ethics doesn’t give clear answers, but it explains why these choices hurt even when they’re right, because you have to live as the person who made them. I ended up in the middle. Results matter, some things like torture are never OK, and being ordered to do something doesn’t make it someone else’s fault.</p>
   `
 };

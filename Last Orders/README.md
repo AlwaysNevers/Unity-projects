@@ -19,13 +19,13 @@ Open `index.html` in any modern browser (Chrome, Edge, Firefox, Safari). Nothing
 | **Endings** | The Road Held (survive) · The Ebb Tide (survive) · Twelve Years Old · Pier Four · Clean Hands |
 | **Ethical perspectives** | Utilitarianism (Bentham, Mill) · Deontology (Kant) · Virtue ethics (Aristotle) |
 | **Moral profile** | After each ending, a triangle between the three philosophies traces your path decision by decision and lands on your profile (Utilitarian, Deontologist, Virtue Ethicist, or Pluralist). Tap any decision card to see why each philosophy agreed or disagreed. |
-| **Designer's Notes** | The ethical issue, historical context, the three frameworks, the philosophical questions, and the designer's own reasoning and conclusions |
+| **Designer's Notes** | A short intro to the ethical issue, the three frameworks, and the designer's own analysis and conclusion |
 
-Being good does not reliably keep you alive, and surviving does not prove you chose well. This is deliberate (see "moral luck" in the Designer's Notes).
+Being good does not reliably keep you alive, and surviving does not prove you chose well. This is deliberate (see the Designer's Notes).
 
 ## Editing the writing
 
-All the text lives in `js/story.js`: the story lines, the choices, how each philosophy judges them, the profiles, and the Designer's Notes. You can change any of it without touching the rest of the code. The **"My reasoning and conclusions"** section at the bottom of that file is a draft. Rewrite it in your own words, because it's graded as your view.
+All the text lives in `js/story.js`: the story lines, the choices, how each philosophy judges them, the profiles, and the Designer's Notes. You can change any of it without touching the rest of the code. The **"My analysis"** and **"My conclusion"** sections at the bottom of that file are a draft. Rewrite them in your own words, because they're graded as your view.
 
 ## Files
 

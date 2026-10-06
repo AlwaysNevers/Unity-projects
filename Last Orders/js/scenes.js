@@ -371,25 +371,6 @@
         drawSkyline(ctx, city, "#2c1712", t, "rgba(255,150,60,1)");
         fire(ctx, 150, 350, 34, t, 9);
         fire(ctx, 250, 352, 22, t, 13);
-        // far bank ridge with the enemy column coming down it
-        ctx.fillStyle = "#1a0f0e";
-        ctx.beginPath();
-        ctx.moveTo(-1500, 400);
-        ctx.lineTo(-1500, 360);
-        ctx.quadraticCurveTo(-200, 350, 250, 372);
-        ctx.lineTo(262, 400);
-        ctx.fill();
-        const v = S.opts.variant || "";
-        const blown = v.startsWith("blown");
-        const crossing = v === "crossing";
-        const adv = blown ? 0.55 : Math.min(1, S.st / 70);
-        for (let i = 0; i < 4; i++) {
-          const tx = 20 + i * 52 + adv * 50;
-          ctx.globalAlpha = 0.22;
-          glow(ctx, tx - 26, 356, 34, "rgba(170,120,90,A)", 0.9);
-          ctx.globalAlpha = 1;
-          tank(ctx, tx, 366 + i * 0.8, 0.36, "#110a0a");
-        }
         // river
         const rg = ctx.createLinearGradient(0, 390, 0, 600);
         rg.addColorStop(0, "#3a1d14");
@@ -401,6 +382,27 @@
           const w = 90 - i * 1.8 + Math.sin(t * 1.5 + i) * 10;
           ctx.fillStyle = `rgba(255,120,50,${0.22 - i * 0.005})`;
           ctx.fillRect(190 - w / 2 + Math.sin(t * 2 + i * 0.7) * 6, y, w, 1.4);
+        }
+        // far bank: the road runs off the bridge and back toward the city
+        ctx.fillStyle = "#140b0a";
+        ctx.beginPath();
+        ctx.moveTo(-1500, 410);
+        ctx.lineTo(-1500, 362);
+        ctx.quadraticCurveTo(-300, 350, 150, 368);
+        ctx.lineTo(345, 372);
+        ctx.quadraticCurveTo(368, 376, 380, 392);
+        ctx.lineTo(396, 410);
+        ctx.fill();
+        const v = S.opts.variant || "";
+        const blown = v.startsWith("blown");
+        const crossing = v === "crossing";
+        const adv = blown ? 0.55 : Math.min(1, S.st / 70);
+        for (let i = 0; i < 4; i++) {
+          const tx = 20 + i * 52 + adv * 50;
+          ctx.globalAlpha = 0.22;
+          glow(ctx, tx - 26, 356, 34, "rgba(170,120,90,A)", 0.9);
+          ctx.globalAlpha = 1;
+          tank(ctx, tx, 366 + i * 0.8, 0.36, "#110a0a");
         }
         // bridge: piers at 250, 430, 610, 790
         const deckY = 372;
@@ -467,48 +469,66 @@
           }
           bus(ctx, 400 + Math.min(S.st * 2.5, 110), deckY);
         }
-        // near bank + you with the detonator
+        // near bank: the road comes off the bridge onto land, where you kneel with the detonator
         ctx.fillStyle = INK;
         ctx.beginPath();
-        ctx.moveTo(700, 620);
-        ctx.lineTo(760, 470);
-        ctx.quadraticCurveTo(880, 440, 2600, 450);
+        ctx.moveTo(680, 620);
+        ctx.lineTo(730, 470);
+        ctx.quadraticCurveTo(762, 400, 786, 381);
+        ctx.lineTo(790, 372);
+        ctx.quadraticCurveTo(1200, 366, 2600, 380);
         ctx.lineTo(2600, 620);
         ctx.fill();
-        person(ctx, 850, 462, 96, { pose: "kneel", helmet: true, arms: "forward", facing: -1 });
-        ctx.fillRect(812, 446, 22, 16);
+        person(ctx, 850, 373, 96, { pose: "kneel", helmet: true, arms: "forward", facing: -1 });
+        ctx.fillRect(812, 357, 22, 16);
         ctx.strokeStyle = INK;
         ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.moveTo(818, 460);
-        ctx.quadraticCurveTo(760, 500, 700, 380);
+        ctx.moveTo(818, 371);
+        ctx.quadraticCurveTo(770, 425, 720, 381);
         ctx.stroke();
-        // Harrow with the radio, behind you
-        if (v !== "blowntank") person(ctx, 905, 452, 104, { helmet: true, rifle: "sling", facing: -1 });
-        // name him with a callout the moment he's introduced (gone once the decision zooms in)
-        if (v === "harrow" && !S.pushed) {
+        // the field radio beside you: Harrow gives his orders from headquarters
+        ctx.fillRect(884, 358, 20, 15);
+        ctx.lineWidth = 1.6;
+        line(ctx, 900, 358, 910, 300);
+        if (!crossing && v !== "blowntank") glow(ctx, 889, 364, 7, "rgba(233,162,59,A)", 0.9);
+        if (v === "radio") {
+          for (let k = 0; k < 3; k++) {
+            const ph = (S.st * 0.9 + k / 3) % 1;
+            ctx.strokeStyle = `rgba(233,162,59,${(1 - ph) * 0.75})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(910, 300, 6 + ph * 28, -0.8, 0.8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(910, 300, 6 + ph * 28, Math.PI - 0.8, Math.PI + 0.8);
+            ctx.stroke();
+          }
+        }
+        // name the voice with a callout the moment he's introduced (gone once the decision zooms in)
+        if (v === "radio" && !S.pushed) {
           const px = 1 / (S.scale * S.cam.z);
           const a = Math.min(1, S.st / 0.5);
-          const top = 452 - 104 - 10;
-          const ty = top - 34 * px - 30;
+          const top = 260;
+          const ty = top - 34 * px;
           ctx.save();
           ctx.globalAlpha = a;
           ctx.strokeStyle = "rgba(233,162,59,0.85)";
           ctx.lineWidth = 1.5 * px;
-          line(ctx, 905, top, 905, ty + 8 * px);
+          line(ctx, 910, top, 910, ty + 8 * px);
           ctx.textAlign = "right";
           ctx.fillStyle = "#e9a23b";
           ctx.font = `500 ${15 * px}px "IBM Plex Mono", ui-monospace, monospace`;
-          ctx.fillText("LT. HARROW", 905 + 4 * px, ty - 16 * px);
+          ctx.fillText("LT. HARROW", 910 + 4 * px, ty - 16 * px);
           ctx.fillStyle = "rgba(230,224,211,0.85)";
           ctx.font = `${11 * px}px "IBM Plex Mono", ui-monospace, monospace`;
-          ctx.fillText("YOUR COMMANDING OFFICER", 905 + 4 * px, ty);
+          ctx.fillText("YOUR COMMANDER · ON THE RADIO", 910 + 4 * px, ty);
           ctx.restore();
         }
         // after waiting, the refugees are safe on your bank
         if (crossing || v === "blowntank") {
           const R = rng(55);
-          for (let i = 0; i < 12; i++) person(ctx, 775 + R() * 60, 460 + R() * 4, 24 + R() * 8, { facing: -1, bulky: R() > 0.6, color: "#0b0909" });
+          for (let i = 0; i < 12; i++) person(ctx, i % 2 ? 794 + R() * 30 : 925 + R() * 70, 372 + R() * 3, 24 + R() * 8, { facing: -1, bulky: R() > 0.6, color: "#0b0909" });
         }
       }
     },
@@ -1603,7 +1623,7 @@
 
   // Camera focal points, portrait framing and blast positions per scene
   Object.assign(SCENES.title, { focal: { x: 620, y: 440 } });
-  Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 625, blast: [520, 372] });
+  Object.assign(SCENES.bridge, { focal: { x: 540, y: 380 }, pfocus: 610, blast: [520, 372] });
   Object.assign(SCENES.farmhouse, { focal: { x: 450, y: 420 } });
   Object.assign(SCENES.cellar, { focal: { x: 470, y: 420 } });
   Object.assign(SCENES.checkpoint, { focal: { x: 500, y: 460 } });
